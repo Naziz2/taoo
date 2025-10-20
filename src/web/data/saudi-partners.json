@@ -1,0 +1,343 @@
+[
+  {
+    "name": "Al Baik",
+    "description": "Saudi Arabia's most beloved fast-food chain, famous for its crispy fried chicken and garlic sauce",
+    "logo": "AB",
+    "webLink": "https://albaik.com",
+    "tags": [{"id": 7, "name": "Food"}],
+    "stores": [
+      {"name": "Riyadh - King Fahd Road", "address": "King Fahd Road, Riyadh", "phone": "+966 11 234 5678"},
+      {"name": "Jeddah - Tahlia Street", "address": "Tahlia Street, Jeddah", "phone": "+966 12 234 5678"}
+    ]
+  },
+  {
+    "name": "Jarir Bookstore",
+    "description": "Leading electronics, office supplies, and book retailer in Saudi Arabia",
+    "logo": "JR",
+    "webLink": "https://jarir.com",
+    "tags": [{"id": 13, "name": "HighTech"}, {"id": 5, "name": "Education"}],
+    "stores": [
+      {"name": "Riyadh - Olaya", "address": "Olaya Street, Riyadh", "phone": "+966 11 828 8888"},
+      {"name": "Jeddah - Red Sea Mall", "address": "Red Sea Mall, Jeddah", "phone": "+966 12 606 9999"}
+    ]
+  },
+  {
+    "name": "Centrepoint",
+    "description": "Popular department store offering fashion, home, and lifestyle products",
+    "logo": "CP",
+    "webLink": "https://centrepoint.com",
+    "tags": [{"id": 6, "name": "Mode"}, {"id": 1, "name": "Maison"}],
+    "stores": [
+      {"name": "Riyadh - Riyadh Park", "address": "Riyadh Park Mall, Riyadh", "phone": "+966 11 454 4444"},
+      {"name": "Jeddah - Mall of Arabia", "address": "Mall of Arabia, Jeddah", "phone": "+966 12 606 6000"}
+    ]
+  },
+  {
+    "name": "eXtra",
+    "description": "Saudi Arabia's leading electronics and home appliances retailer",
+    "logo": "EX",
+    "webLink": "https://extra.com",
+    "tags": [{"id": 13, "name": "HighTech"}, {"id": 1, "name": "Maison"}],
+    "stores": [
+      {"name": "Riyadh - Granada Center", "address": "Granada Center, Riyadh", "phone": "+966 920 003 278"},
+      {"name": "Dammam - Al Shatea Mall", "address": "Al Shatea Mall, Dammam", "phone": "+966 920 003 278"}
+    ]
+  },
+  {
+    "name": "Fitness Time",
+    "description": "Premier fitness and wellness center chain in Saudi Arabia",
+    "logo": "FT",
+    "webLink": "https://fitnesstime.com.sa",
+    "tags": [{"id": 3, "name": "Sport"}, {"id": 12, "name": "Santé"}],
+    "stores": [
+      {"name": "Riyadh - Takhassusi", "address": "Takhassusi Street, Riyadh", "phone": "+966 920 001 122"},
+      {"name": "Jeddah - Al Hamra", "address": "Al Hamra District, Jeddah", "phone": "+966 920 001 122"}
+    ]
+  },
+  {
+    "name": "Al Nahdi Pharmacy",
+    "description": "Leading pharmacy chain offering healthcare products and services",
+    "logo": "AN",
+    "webLink": "https://nahdi.sa",
+    "tags": [{"id": 12, "name": "Santé"}, {"id": 2, "name": "Beauté"}],
+    "stores": [
+      {"name": "Riyadh - King Abdullah Road", "address": "King Abdullah Road, Riyadh", "phone": "+966 920 000 787"},
+      {"name": "Jeddah - Palestine Street", "address": "Palestine Street, Jeddah", "phone": "+966 920 000 787"}
+    ]
+  },
+  {
+    "name": "Kudu",
+    "description": "Popular Saudi fast-food restaurant chain serving burgers and local favorites",
+    "logo": "KD",
+    "webLink": "https://kudu.com.sa",
+    "tags": [{"id": 7, "name": "Food"}],
+    "stores": [
+      {"name": "Riyadh - Exit 10", "address": "Exit 10, Northern Ring Road, Riyadh", "phone": "+966 11 460 0000"},
+      {"name": "Jeddah - Corniche", "address": "Corniche Road, Jeddah", "phone": "+966 12 653 0000"}
+    ]
+  },
+  {
+    "name": "H&M Saudi Arabia",
+    "description": "International fashion retailer offering trendy clothing for all",
+    "logo": "HM",
+    "webLink": "https://www2.hm.com/ar_sa",
+    "tags": [{"id": 6, "name": "Mode"}],
+    "stores": [
+      {"name": "Riyadh - Kingdom Centre", "address": "Kingdom Centre, Riyadh", "phone": "+966 11 211 2211"},
+      {"name": "Jeddah - Red Sea Mall", "address": "Red Sea Mall, Jeddah", "phone": "+966 12 606 1234"}
+    ]
+  },
+  {
+    "name": "Zara Saudi Arabia",
+    "description": "Leading Spanish fashion brand with latest trends",
+    "logo": "ZR",
+    "webLink": "https://www.zara.com/sa",
+    "tags": [{"id": 6, "name": "Mode"}],
+    "stores": [
+      {"name": "Riyadh - Panorama Mall", "address": "Panorama Mall, Riyadh", "phone": "+966 11 293 0000"},
+      {"name": "Jeddah - Mall of Arabia", "address": "Mall of Arabia, Jeddah", "phone": "+966 12 606 7000"}
+    ]
+  },
+  {
+    "name": "Max Fashion",
+    "description": "Value fashion retailer offering affordable clothing and accessories",
+    "logo": "MX",
+    "webLink": "https://maxfashion.com/sa",
+    "tags": [{"id": 6, "name": "Mode"}],
+    "stores": [
+      {"name": "Riyadh - Riyadh Gallery", "address": "Riyadh Gallery Mall, Riyadh", "phone": "+966 11 234 5000"},
+      {"name": "Jeddah - Tahlia Street", "address": "Tahlia Street, Jeddah", "phone": "+966 12 654 3000"}
+    ]
+  },
+  {
+    "name": "McDonald's Saudi Arabia",
+    "description": "World-famous fast-food chain serving burgers and fries",
+    "logo": "MC",
+    "webLink": "https://www.mcdonaldsarabia.com/sa/ar",
+    "tags": [{"id": 7, "name": "Food"}],
+    "stores": [
+      {"name": "Riyadh - King Fahd Road", "address": "King Fahd Road, Riyadh", "phone": "+966 920 000 500"},
+      {"name": "Jeddah - Corniche", "address": "Corniche Road, Jeddah", "phone": "+966 920 000 500"}
+    ]
+  },
+  {
+    "name": "KFC Saudi Arabia",
+    "description": "International fried chicken chain",
+    "logo": "KF",
+    "webLink": "https://kfcarabia.com/sa/ar",
+    "tags": [{"id": 7, "name": "Food"}],
+    "stores": [
+      {"name": "Riyadh - Olaya", "address": "Olaya Street, Riyadh", "phone": "+966 920 000 111"},
+      {"name": "Jeddah - Al Andalus", "address": "Al Andalus District, Jeddah", "phone": "+966 920 000 111"}
+    ]
+  },
+  {
+    "name": "STC - Saudi Telecom",
+    "description": "Leading telecommunications company in Saudi Arabia",
+    "logo": "ST",
+    "webLink": "https://www.stc.com.sa",
+    "tags": [{"id": 13, "name": "HighTech"}],
+    "stores": [
+      {"name": "Riyadh - Takhassusi", "address": "Takhassusi Street, Riyadh", "phone": "+966 900 9000"},
+      {"name": "Jeddah - Tahlia", "address": "Tahlia Street, Jeddah", "phone": "+966 900 9000"}
+    ]
+  },
+  {
+    "name": "Mobily",
+    "description": "Major mobile telecommunications provider in Saudi Arabia",
+    "logo": "MB",
+    "webLink": "https://www.mobily.com.sa",
+    "tags": [{"id": 13, "name": "HighTech"}],
+    "stores": [
+      {"name": "Riyadh - Olaya", "address": "Olaya Street, Riyadh", "phone": "+966 920 005 000"},
+      {"name": "Jeddah - Red Sea Mall", "address": "Red Sea Mall, Jeddah", "phone": "+966 920 005 000"}
+    ]
+  },
+  {
+    "name": "Gold's Gym",
+    "description": "International fitness center with state-of-the-art equipment",
+    "logo": "GG",
+    "webLink": "https://www.goldsgym.com",
+    "tags": [{"id": 3, "name": "Sport"}],
+    "stores": [
+      {"name": "Riyadh - Al Malqa", "address": "Al Malqa District, Riyadh", "phone": "+966 11 234 7890"},
+      {"name": "Jeddah - Al Zahraa", "address": "Al Zahraa District, Jeddah", "phone": "+966 12 654 7890"}
+    ]
+  },
+  {
+    "name": "Body Masters",
+    "description": "Premium fitness and wellness center",
+    "logo": "BM",
+    "webLink": "https://bodymasters.sa",
+    "tags": [{"id": 3, "name": "Sport"}, {"id": 12, "name": "Santé"}],
+    "stores": [
+      {"name": "Riyadh - Narjis", "address": "Narjis District, Riyadh", "phone": "+966 11 456 7890"},
+      {"name": "Khobar - Corniche", "address": "Corniche Road, Khobar", "phone": "+966 13 894 5678"}
+    ]
+  },
+  {
+    "name": "Saudi German Hospital",
+    "description": "Leading private healthcare provider in Saudi Arabia",
+    "logo": "SG",
+    "webLink": "https://sghgroup.com.sa",
+    "tags": [{"id": 12, "name": "Santé"}],
+    "stores": [
+      {"name": "Riyadh", "address": "Maather Street, Riyadh", "phone": "+966 11 400 8222"},
+      {"name": "Jeddah", "address": "Al Khalidiyah, Jeddah", "phone": "+966 12 618 8888"}
+    ]
+  },
+  {
+    "name": "Boots Saudi Arabia",
+    "description": "Health and beauty pharmacy chain",
+    "logo": "BT",
+    "webLink": "https://boots-me.com/sa",
+    "tags": [{"id": 2, "name": "Beauté"}, {"id": 12, "name": "Santé"}],
+    "stores": [
+      {"name": "Riyadh - Kingdom Centre", "address": "Kingdom Centre Mall, Riyadh", "phone": "+966 11 211 5000"},
+      {"name": "Jeddah - Mall of Arabia", "address": "Mall of Arabia, Jeddah", "phone": "+966 12 606 8000"}
+    ]
+  },
+  {
+    "name": "Kumon Saudi Arabia",
+    "description": "International after-school learning program",
+    "logo": "KM",
+    "webLink": "https://www.kumon.com.sa",
+    "tags": [{"id": 5, "name": "Education"}, {"id": 8, "name": "Enfants"}],
+    "stores": [
+      {"name": "Riyadh - Al Olaya", "address": "Al Olaya District, Riyadh", "phone": "+966 11 293 1111"},
+      {"name": "Jeddah - Al Rawdah", "address": "Al Rawdah District, Jeddah", "phone": "+966 12 606 2222"}
+    ]
+  },
+  {
+    "name": "Sylvan Learning",
+    "description": "Personalized tutoring and educational programs",
+    "logo": "SL",
+    "webLink": "https://www.sylvanlearning.com",
+    "tags": [{"id": 5, "name": "Education"}],
+    "stores": [
+      {"name": "Riyadh - Granada", "address": "Granada District, Riyadh", "phone": "+966 11 454 3333"},
+      {"name": "Jeddah - Al Andalus", "address": "Al Andalus District, Jeddah", "phone": "+966 12 653 4444"}
+    ]
+  },
+  {
+    "name": "British Council Saudi Arabia",
+    "description": "English language courses and cultural exchange programs",
+    "logo": "BC",
+    "webLink": "https://www.britishcouncil.sa",
+    "tags": [{"id": 5, "name": "Education"}],
+    "stores": [
+      {"name": "Riyadh", "address": "Al Olaya Street, Riyadh", "phone": "+966 11 293 0000"},
+      {"name": "Jeddah", "address": "Palestine Street, Jeddah", "phone": "+966 12 651 0000"}
+    ]
+  },
+  {
+    "name": "IKEA Saudi Arabia",
+    "description": "Swedish furniture and home accessories retailer",
+    "logo": "IK",
+    "webLink": "https://www.ikea.com/sa",
+    "tags": [{"id": 1, "name": "Maison"}],
+    "stores": [
+      {"name": "Riyadh", "address": "Exit 5, Khurais Road, Riyadh", "phone": "+966 920 010 203"},
+      {"name": "Jeddah", "address": "Haifa Street, Jeddah", "phone": "+966 920 010 203"}
+    ]
+  },
+  {
+    "name": "Home Centre",
+    "description": "Home furnishings and decor store",
+    "logo": "HC",
+    "webLink": "https://www.homecentre.com/sa",
+    "tags": [{"id": 1, "name": "Maison"}],
+    "stores": [
+      {"name": "Riyadh - Riyadh Park", "address": "Riyadh Park Mall, Riyadh", "phone": "+966 11 454 5555"},
+      {"name": "Jeddah - Red Sea Mall", "address": "Red Sea Mall, Jeddah", "phone": "+966 12 606 5555"}
+    ]
+  },
+  {
+    "name": "Panda",
+    "description": "Major supermarket chain in Saudi Arabia",
+    "logo": "PD",
+    "webLink": "https://panda.com.sa",
+    "tags": [{"id": 7, "name": "Food"}],
+    "stores": [
+      {"name": "Riyadh - Takhassusi", "address": "Takhassusi Street, Riyadh", "phone": "+966 920 000 800"},
+      {"name": "Jeddah - Palestine Street", "address": "Palestine Street, Jeddah", "phone": "+966 920 000 800"}
+    ]
+  },
+  {
+    "name": "Danube",
+    "description": "Popular hypermarket chain",
+    "logo": "DB",
+    "webLink": "https://www.danubestore.com",
+    "tags": [{"id": 7, "name": "Food"}, {"id": 1, "name": "Maison"}],
+    "stores": [
+      {"name": "Riyadh - Olaya", "address": "Olaya Street, Riyadh", "phone": "+966 920 006 006"},
+      {"name": "Jeddah - Al Hamra", "address": "Al Hamra District, Jeddah", "phone": "+966 920 006 006"}
+    ]
+  },
+  {
+    "name": "Shwarmer",
+    "description": "Popular shawarma restaurant chain",
+    "logo": "SW",
+    "webLink": "https://shwarmer.com",
+    "tags": [{"id": 7, "name": "Food"}],
+    "stores": [
+      {"name": "Riyadh - King Fahd Road", "address": "King Fahd Road, Riyadh", "phone": "+966 11 460 1111"},
+      {"name": "Jeddah - Tahlia", "address": "Tahlia Street, Jeddah", "phone": "+966 12 654 1111"}
+    ]
+  },
+  {
+    "name": "Herfy",
+    "description": "Saudi fast-food chain serving burgers and Arabic dishes",
+    "logo": "HF",
+    "webLink": "https://herfy.com",
+    "tags": [{"id": 7, "name": "Food"}],
+    "stores": [
+      {"name": "Riyadh - Olaya", "address": "Olaya Street, Riyadh", "phone": "+966 920 001 111"},
+      {"name": "Dammam - Corniche", "address": "Corniche Road, Dammam", "phone": "+966 920 001 111"}
+    ]
+  },
+  {
+    "name": "The Coffee Bean & Tea Leaf",
+    "description": "International coffee house chain",
+    "logo": "CB",
+    "webLink": "https://coffeebean.com",
+    "tags": [{"id": 17, "name": "Café"}],
+    "stores": [
+      {"name": "Riyadh - Kingdom Centre", "address": "Kingdom Centre, Riyadh", "phone": "+966 11 211 9999"},
+      {"name": "Jeddah - Red Sea Mall", "address": "Red Sea Mall, Jeddah", "phone": "+966 12 606 9999"}
+    ]
+  },
+  {
+    "name": "Starbucks Saudi Arabia",
+    "description": "World's leading coffee chain",
+    "logo": "SB",
+    "webLink": "https://www.starbucks.sa",
+    "tags": [{"id": 17, "name": "Café"}],
+    "stores": [
+      {"name": "Riyadh - Tahlia", "address": "Tahlia Street, Riyadh", "phone": "+966 920 007 007"},
+      {"name": "Jeddah - Corniche", "address": "Corniche Road, Jeddah", "phone": "+966 920 007 007"}
+    ]
+  },
+  {
+    "name": "Toy Town",
+    "description": "Largest toy retailer in Saudi Arabia",
+    "logo": "TT",
+    "webLink": "https://toytown.com.sa",
+    "tags": [{"id": 8, "name": "Enfants"}],
+    "stores": [
+      {"name": "Riyadh - Panorama Mall", "address": "Panorama Mall, Riyadh", "phone": "+966 11 293 4444"},
+      {"name": "Jeddah - Mall of Arabia", "address": "Mall of Arabia, Jeddah", "phone": "+966 12 606 4444"}
+    ]
+  },
+  {
+    "name": "Sephora Saudi Arabia",
+    "description": "Leading beauty and cosmetics retailer",
+    "logo": "SP",
+    "webLink": "https://www.sephora.sa",
+    "tags": [{"id": 2, "name": "Beauté"}],
+    "stores": [
+      {"name": "Riyadh - Kingdom Centre", "address": "Kingdom Centre Mall, Riyadh", "phone": "+966 11 211 7777"},
+      {"name": "Jeddah - Red Sea Mall", "address": "Red Sea Mall, Jeddah", "phone": "+966 12 606 7777"}
+    ]
+  }
+]
