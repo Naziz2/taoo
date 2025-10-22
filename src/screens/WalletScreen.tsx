@@ -7,9 +7,11 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Modal,
+  Image,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -21,6 +23,7 @@ export default function WalletScreen() {
   const { t } = useLanguage();
   const { user } = useUser();
   const navigation = useNavigation<WalletScreenNavigationProp>();
+  const insets = useSafeAreaInsets();
   const [showPointsInfo, setShowPointsInfo] = useState(false);
 
   const userLevel = user?.level || 'basic';
@@ -31,10 +34,30 @@ export default function WalletScreen() {
   const maxSplitMonths = user?.maxSplitMonths || 6;
 
   const quickActions = [
-    { icon: 'qrcode-scan', label: t('wallet.scanOrder') || 'Scan Order', color: '#EAB308' },
-    { icon: 'receipt', label: t('wallet.uploadReceipt') || 'Upload Receipt', color: '#EAB308' },
-    { icon: 'gift', label: t('wallet.redeem') || 'Redeem', color: '#EAB308' },
-    { icon: 'credit-card', label: t('wallet.flouciPay') || 'Flouci Pay', color: '#EAB308' },
+    { 
+      icon: 'qrcode-scan', 
+      label: t('wallet.scanOrder') || 'Scanner QR', 
+      color: '#EAB308',
+      action: () => navigation.navigate('QRScanner')
+    },
+    { 
+      icon: 'receipt', 
+      label: t('wallet.uploadReceipt') || 'Télécharger Reçu', 
+      color: '#EAB308',
+      action: () => navigation.navigate('ReceiptUpload')
+    },
+    { 
+      icon: 'gift', 
+      label: t('wallet.redeem') || 'Échanger', 
+      color: '#EAB308',
+      action: () => navigation.navigate('RewardsList')
+    },
+    { 
+      icon: 'credit-card', 
+      label: t('wallet.flouciPay') || 'Payer avec Flouci', 
+      color: '#EAB308',
+      action: () => navigation.navigate('FlouciPayment')
+    },
   ];
 
   const recentActivity = [
@@ -57,16 +80,24 @@ export default function WalletScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity style={styles.profileButton}>
           <MaterialCommunityIcons name="account" color="#6B7280" size={24} />
         </TouchableOpacity>
 
-        <Text style={styles.logo}>DO SHOPPING</Text>
+        <Image
+          source={require('../../assets/taoo_black 1.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
         <TouchableOpacity style={styles.pointsContainer}>
           <Text style={styles.pointsText}>{user?.points?.toLocaleString() || '0'}</Text>
-          <Text style={styles.coinIcon}>🪙</Text>
+          <Image 
+            source={require('../../assets/coin-icon.png')} 
+            style={styles.coinIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 
@@ -93,7 +124,11 @@ export default function WalletScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-            <Text style={styles.coinBig}>🪙</Text>
+            <Image 
+              source={require('../../assets/coin-icon.png')} 
+              style={styles.coinBig}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.earnDesc}>
             {t('wallet.earnPointsDesc') || 'Earn points with every purchase at our partner stores!'}
@@ -155,10 +190,15 @@ export default function WalletScreen() {
 
         {/* Quick Actions */}
         <View style={styles.actionsCard}>
-          <Text style={styles.actionsTitle}>{t('wallet.quickActions')}</Text>
+          <Text style={styles.actionsTitle}>{t('wallet.quickActions') || 'Actions Rapides'}</Text>
           <View style={styles.actionsGrid}>
             {quickActions.map((action, index) => (
-              <TouchableOpacity key={index} style={styles.actionItem}>
+              <TouchableOpacity 
+                key={index} 
+                style={styles.actionItem}
+                onPress={action.action}
+                activeOpacity={0.7}
+              >
                 <View style={styles.actionIcon}>
                   <MaterialCommunityIcons name={action.icon as any} size={24} color={action.color} />
                 </View>
@@ -276,10 +316,8 @@ const styles = StyleSheet.create({
     borderColor: '#EAB308',
   },
   logo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#EAB308',
-    letterSpacing: 1,
+    height: 28,
+    width: 120,
   },
   pointsContainer: {
     flexDirection: 'row',
@@ -290,13 +328,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   pointsText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#000000',
     marginRight: 4,
   },
   coinIcon: {
-    fontSize: 14,
+    width: 16,
+    height: 16,
   },
   content: {
     flex: 1,
@@ -352,7 +391,8 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   coinBig: {
-    fontSize: 54,
+    width: 60,
+    height: 60,
   },
   earnDesc: {
     fontSize: 14,

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { I18nManager } from 'react-native';
+import { I18nManager, Alert, Platform, NativeModules, View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type Language = 'en' | 'fr' | 'ar';
@@ -7,13 +7,33 @@ export type Language = 'en' | 'fr' | 'ar';
 interface LanguageContextType {
   setLanguage: (language: Language) => void;
   language: Language;
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+  isRTL: boolean;
+  isReloading: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 const translations = {
   en: {
+    'points.abbr': 'pts',
+    // Daily Rewards / Wheel
+    'dailyRewards.title': 'Daily Spin',
+    'dailyRewards.specialGift': 'Special Gift',
+    'dailyRewards.congratsTitle': 'Congratulations!',
+    'dailyRewards.youWonPoints': 'You won {{points}} points!',
+    'dailyRewards.infoTitle': 'Win up to 2000 points',
+    'dailyRewards.infoDesc': 'Spin the wheel to earn points',
+    'dailyRewards.missionAccomplished': 'Mission accomplished! Come back tomorrow.',
+    'dailyRewards.rulesTitle': 'Game Rules',
+    'dailyRewards.ruleStreak': 'Log in 7 consecutive days for the grand prize',
+    'dailyRewards.ruleInstant': 'Points are added immediately to your balance',
+    'dailyRewards.ruleMissedResets': 'Missing a day resets your streak',
+    'dailyRewards.subtitleUpTo': 'Spin the wheel and win up to',
+    'dailyRewards.playNow': 'Spin the wheel',
+    'dailyRewards.alreadyPlayedToday': 'Already played today',
+    'dailyRewards.chancePerDay': '1 chance per day',
+    'dailyRewards.rewardsRange': 'Rewards: 20 to 2000 pts',
     'auth.sendCode': 'Send 4-Digit Code',
     'auth.enterCode': 'Enter 4-Digit Verification Code',
     'auth.testCode': 'For testing: Use code 1234',
@@ -39,6 +59,15 @@ const translations = {
     'auth.enterLastName': 'Enter your last name',
     'auth.resendIn': 'Resend code in',
     'auth.welcomeToTaoo': 'Welcome to TAOO',
+    'auth.privacyTitle': 'Your privacy is protected',
+    'auth.privacyText': "We'll send you a 4-digit verification code via SMS. Standard messaging rates may apply.",
+    'auth.errorFirstLastName': 'Please enter your first and last name',
+    'auth.errorValidPhone': 'Please enter a valid Saudi phone number',
+    'auth.errorComplete4Digit': 'Please enter the complete 4-digit code',
+    'auth.errorSendOTP': 'Failed to send OTP. Please try again.',
+    'auth.errorRegistration': 'Registration failed. Please try again.',
+    'auth.errorResend': 'Failed to resend code. Please try again.',
+    'auth.successCodeSent': 'Verification code sent!',
     'header.search': 'Search stores and products',
     'nav.home': 'Home',
     'nav.stores': 'Stores',
@@ -46,7 +75,9 @@ const translations = {
     'nav.wallet': 'Wallet',
     'nav.account': 'Account',
     'nav.convert': 'Convert',
-    'home.promotions': 'Promotions',
+  'home.promotions': 'Promotions',
+  'home.discountUpTo': 'Up to {{percent}} off',
+  'home.tripIstanbul7Days': '7 Days in Istanbul',
     'home.featuredPartners': 'Featured Partners',
     'home.hotDeals': 'Hot Deals',
     'home.partnerStores': 'Partner Stores',
@@ -71,6 +102,49 @@ const translations = {
     'home.viewStore': 'View Store',
     'deals.title': 'Deals',
     'deals.upgradeNow': 'Upgrade Now',
+    'deals.upgradeTitle': 'Upgrade Your Account Level',
+    'deals.upgradeDesc': 'Unlock premium deals and exclusive offers! Upgrade to Silver or Gold to access all premium content.',
+    'deals.currentLevel': 'Current: Basic',
+    'deals.targetLevel': '→ Silver/Gold',
+    // Deal Detail (minimal)
+    'dealDetail.title': 'Offer Details',
+    'dealDetail.offer': 'Offer',
+    'dealDetail.unavailable': 'Offer not available',
+    'dealDetail.daysCount': '{{count}} days',
+    'dealDetail.voucherValidity': 'Voucher valid {{count}} days after purchase of the offer',
+    // Convert Screen
+    'convert.back': 'Back',
+    'convert.pointsYouHave': 'You have this amount of points with us',
+    'convert.category': 'Category',
+    'convert.all': 'All',
+    'convert.featured': 'Featured',
+    'convert.recent': 'Recent',
+    'convert.get': 'Get',
+    'convert.additionalInfo': 'Additional Information',
+    'convert.termsOfUse': 'Terms of Use',
+    'convert.howToUsePoints': 'How to use points',
+    'convert.whatTaooOffers': 'What Taoo offers',
+    'convert.getMorePoints': 'How to get more points',
+    'convert.days': 'Days',
+    'convert.points': 'Points',
+    'convert.posts': 'Posts',
+    'convert.categoryGiftCards': 'Gift Cards 🎁',
+    'convert.categoryGeneralProducts': 'General Products 📱',
+    'convert.categoryChineseCourses': 'Chinese Courses 🎓',
+    'convert.categoryFlouciTransactions': 'Flouci Transactions 💰',
+    'convert.categoryTravelAgencies': 'Travel Agencies ✈️',
+    // Deals Screen
+    'deals.viewAll': 'View All',
+    'deals.featured': '⭐ Featured',
+    'deals.restaurantsGastronomy': 'Restaurants & Gastronomy',
+    'deals.sportFitness': 'Sport & Fitness',
+    'deals.opticsVision': 'Optics & Vision',
+    'deals.technologyGaming': 'Technology & Gaming',
+    'deals.educationLeisure': 'Education & Leisure',
+    'deals.entertainmentRelaxation': 'Entertainment & Relaxation',
+    'deals.discountPercent': '{{percent}}% discount',
+    'deals.discountMoney': '{{amount}}DT discount',
+    'deals.specialOffer': 'Special Offer',
     'stores.title': 'Stores',
     'stores.all': 'All',
     'stores.food': 'Food',
@@ -82,6 +156,9 @@ const translations = {
     'stores.searchPlaceholder': 'Search stores...',
     'stores.noResults': 'No stores found',
     'stores.cashback': 'cashback',
+    'stores.featuredPartners': 'Featured Partners',
+    'stores.allStores': 'All Stores',
+    'stores.storesCount': '({{count}})',
     'wallet.title': 'My Wallet',
     'wallet.availablePoints': 'Available Points',
     'wallet.estimated': 'Estimated',
@@ -176,6 +253,20 @@ const translations = {
     'account.name': 'Name',
     'account.phone': 'Phone',
     'account.upgrade': 'Upgrade Account',
+    'account.currentLevel': 'Your current level',
+    'account.favorites': 'Favorites',
+    'account.favoritesDesc': 'Deals and favorite stores',
+    'account.interests': 'Interests',
+    'account.interestsDesc': 'All your interests',
+    'account.records': 'Records',
+    'account.recordsDesc': 'Past scans and purchases',
+    'account.helpDesc': 'Support and FAQs',
+    'account.chooseLanguage': 'Choose your language',
+    'account.appearance': 'Appearance',
+    'account.appearanceDesc': 'Light or Dark mode',
+    'account.terms': 'Terms of Service',
+    'account.deleteAccount': 'Delete Account',
+    'wallet.allTransactions': 'All your transactions',
     'language.choose': 'Choose Language',
     'language.current': 'Current language',
     'language.changed': 'Language Changed',
@@ -213,6 +304,24 @@ const translations = {
     'logout.cancel': 'Cancel',
   },
   fr: {
+    'points.abbr': 'pts',
+    // Daily Rewards / Wheel
+    'dailyRewards.title': 'Spin Quotidien',
+    'dailyRewards.specialGift': 'Cadeau Spécial',
+    'dailyRewards.congratsTitle': 'Félicitations !',
+    'dailyRewards.youWonPoints': 'Vous avez gagné {{points}} points !',
+    'dailyRewards.infoTitle': "Gagnez jusqu'à 2000 points",
+    'dailyRewards.infoDesc': 'Tournez la roue pour gagner des points',
+    'dailyRewards.missionAccomplished': 'Mission accomplie ! Revenez demain.',
+    'dailyRewards.rulesTitle': 'Règles du jeu',
+    'dailyRewards.ruleStreak': 'Connectez-vous 7 jours consécutifs pour le grand prix',
+    'dailyRewards.ruleInstant': 'Les points gagnés sont ajoutés immédiatement à votre solde',
+    'dailyRewards.ruleMissedResets': 'Manquer un jour remet le compteur à zéro',
+    'dailyRewards.subtitleUpTo': "Tournez la roue et gagnez jusqu'à",
+    'dailyRewards.playNow': 'Tournez la roue',
+    'dailyRewards.alreadyPlayedToday': "Déjà joué aujourd'hui",
+    'dailyRewards.chancePerDay': '1 chance par jour',
+    'dailyRewards.rewardsRange': 'Récompenses: 20 à 2000 pts',
     'auth.sendCode': 'Envoyer le Code à 4 Chiffres',
     'auth.enterCode': 'Entrez le Code de Vérification à 4 Chiffres',
     'auth.testCode': 'Pour les tests : Utilisez le code 1234',
@@ -226,13 +335,26 @@ const translations = {
     'auth.firstName': 'Prénom',
     'auth.lastName': 'Nom',
     'auth.welcomeBonus': 'Vous recevrez 50 points comme cadeau de bienvenue !',
+    'auth.privacyTitle': 'Votre vie privée est protégée',
+    'auth.privacyText': 'Nous vous enverrons un code de vérification à 4 chiffres par SMS. Les tarifs SMS standards peuvent s\'appliquer.',
+    'auth.errorFirstLastName': 'Veuillez entrer votre prénom et nom',
+    'auth.errorValidPhone': 'Veuillez entrer un numéro de téléphone saoudien valide',
+    'auth.errorComplete4Digit': 'Veuillez entrer le code complet à 4 chiffres',
+    'auth.errorSendOTP': 'Échec de l\'envoi du code. Veuillez réessayer.',
+    'auth.errorRegistration': 'Échec de l\'inscription. Veuillez réessayer.',
+    'auth.errorResend': 'Échec du renvoi du code. Veuillez réessayer.',
+    'auth.successCodeSent': 'Code de vérification envoyé !',
+    'auth.welcomeToTaoo': 'Bienvenue à TAOO',
     'header.search': 'Rechercher des magasins et produits',
     'nav.home': 'Accueil',
     'nav.stores': 'Magasins',
     'nav.deals': 'Offres',
     'nav.wallet': 'Portefeuille',
     'nav.account': 'Compte',
-    'home.promotions': 'Promotions',
+  'nav.convert': 'Convertir',
+  'home.promotions': 'Promotions',
+  'home.discountUpTo': "Jusqu'à {{percent}} de réduction",
+  'home.tripIstanbul7Days': '7 Jours à Istanbul',
     'home.partnerStores': 'Magasins Partenaires',
     'home.earnPoints': 'Gagnez des Points !',
     'home.earnPointsDesc': 'Achetez dans les magasins partenaires et gagnez des points à chaque achat',
@@ -255,6 +377,49 @@ const translations = {
     'home.viewStore': 'Voir le Magasin',
     'deals.title': 'Offres',
     'deals.upgradeNow': 'Mettre à Niveau',
+    'deals.upgradeTitle': 'Mettez à niveau votre compte',
+    'deals.upgradeDesc': 'Débloquez des offres premium et exclusives ! Passez à Argent ou Or pour accéder à tout le contenu premium.',
+    'deals.currentLevel': 'Actuel : Basique',
+    'deals.targetLevel': '→ Argent/Or',
+    // Détails de l'offre (minimal)
+    'dealDetail.title': "Détails de l'offre",
+    'dealDetail.offer': 'Offre',
+    'dealDetail.unavailable': 'Offre non disponible',
+    'dealDetail.daysCount': '{{count}} jours',
+    'dealDetail.voucherValidity': "Bon valable {{count}} jours après l'achat de l'offre",
+    // Convert Screen
+    'convert.back': 'Retour',
+    'convert.pointsYouHave': 'Vous avez ce montant de points avec nous',
+    'convert.category': 'Catégorie',
+    'convert.all': 'Tous',
+    'convert.featured': 'En vedette',
+    'convert.recent': 'Récent',
+    'convert.get': 'Obtenir',
+    'convert.additionalInfo': 'Informations complémentaires',
+    'convert.termsOfUse': "Conditions d'utilisation",
+    'convert.howToUsePoints': 'Comment utiliser les points',
+    'convert.whatTaooOffers': 'Ce que Taoo offre',
+    'convert.getMorePoints': 'Comment obtenir plus de points',
+    'convert.days': 'Jours',
+    'convert.points': 'Points',
+    'convert.posts': 'Publications',
+    'convert.categoryGiftCards': 'Cartes Cadeaux 🎁',
+    'convert.categoryGeneralProducts': 'Produits Générals 📱',
+    'convert.categoryChineseCourses': 'Cours de Chinois 🎓',
+    'convert.categoryFlouciTransactions': 'Transaction Flouci 💰',
+    'convert.categoryTravelAgencies': 'Agences et Voyages ✈️',
+    // Deals Screen
+    'deals.viewAll': 'Tout voir',
+    'deals.featured': '⭐ À la une',
+    'deals.restaurantsGastronomy': 'Restaurants & Gastronomie',
+    'deals.sportFitness': 'Sport & Fitness',
+    'deals.opticsVision': 'Optique & Vision',
+    'deals.technologyGaming': 'Technologie & Gaming',
+    'deals.educationLeisure': 'Éducation & Loisirs',
+    'deals.entertainmentRelaxation': 'Divertissement & Détente',
+    'deals.discountPercent': '{{percent}}% de réduction',
+    'deals.discountMoney': '{{amount}}DT de réduction',
+    'deals.specialOffer': 'Offre spéciale',
     'stores.title': 'Magasins',
     'stores.all': 'Tous',
     'stores.food': 'Alimentation',
@@ -266,6 +431,9 @@ const translations = {
     'stores.searchPlaceholder': 'Rechercher des magasins...',
     'stores.noResults': 'Aucun magasin trouvé',
     'stores.cashback': 'cashback',
+    'stores.featuredPartners': 'Partenaires en vedette',
+    'stores.allStores': 'Tous les magasins',
+    'stores.storesCount': '({{count}})',
     'wallet.title': 'Mon Portefeuille',
     'wallet.availablePoints': 'Points Disponibles',
     'wallet.estimated': 'Estimé',
@@ -360,6 +528,20 @@ const translations = {
     'account.name': 'Nom',
     'account.phone': 'Téléphone',
     'account.upgrade': 'Améliorer le Compte',
+    'account.currentLevel': 'Votre niveau actuel',
+    'account.favorites': 'Favoris',
+    'account.favoritesDesc': 'Offres et magasins favoris',
+    'account.interests': 'Intérêts',
+    'account.interestsDesc': 'Tous vos intérêts',
+    'account.records': 'Historique',
+    'account.recordsDesc': 'Achats et scans passés',
+    'account.helpDesc': 'Support et FAQs',
+    'account.chooseLanguage': 'Choisissez votre langue',
+    'account.appearance': 'Apparence',
+    'account.appearanceDesc': 'Mode clair ou sombre',
+    'account.terms': "Conditions d'utilisation",
+    'account.deleteAccount': 'Supprimer le compte',
+    'wallet.allTransactions': 'Toutes vos transactions',
     'language.choose': 'Choisir la langue',
     'language.current': 'Langue actuelle',
     'language.changed': 'Langue changée',
@@ -397,6 +579,24 @@ const translations = {
     'logout.cancel': 'Annuler',
   },
   ar: {
+    'points.abbr': 'نق',
+    // Daily Rewards / Wheel
+    'dailyRewards.title': 'الدوران اليومي',
+    'dailyRewards.specialGift': 'هدية خاصة',
+    'dailyRewards.congratsTitle': 'تهانينا!',
+    'dailyRewards.youWonPoints': 'لقد ربحت {{points}} نقطة!',
+    'dailyRewards.infoTitle': 'اربح حتى 2000 نقطة',
+    'dailyRewards.infoDesc': 'دوّر العجلة لكسب النقاط',
+    'dailyRewards.missionAccomplished': 'تمت المهمة! عد غداً.',
+    'dailyRewards.rulesTitle': 'قواعد اللعبة',
+    'dailyRewards.ruleStreak': 'سجّل الدخول 7 أيام متتالية للجائزة الكبرى',
+    'dailyRewards.ruleInstant': 'تُضاف النقاط فوراً إلى رصيدك',
+    'dailyRewards.ruleMissedResets': 'فقدان يوم يعيد العداد إلى الصفر',
+    'dailyRewards.subtitleUpTo': 'دوّر العجلة واربح حتى',
+    'dailyRewards.playNow': 'دوّر العجلة',
+    'dailyRewards.alreadyPlayedToday': 'لعبت اليوم',
+    'dailyRewards.chancePerDay': 'فرصة واحدة يومياً',
+    'dailyRewards.rewardsRange': 'المكافآت: 20 إلى 2000 نق',
     'auth.sendCode': 'إرسال رمز من 4 أرقام',
     'auth.enterCode': 'أدخل رمز التحقق المكون من 4 أرقام',
     'auth.testCode': 'للاختبار: استخدم الرمز 1234',
@@ -407,13 +607,30 @@ const translations = {
     'auth.resendCode': 'إعادة إرسال رمز التحقق',
     'auth.verifyCode': 'تحقق من الرمز',
     'auth.completeProfile': 'أكمل ملفك الشخصي',
+    'auth.resendIn': 'إعادة إرسال الرمز في',
+    'auth.welcomeToTaoo': 'مرحباً بك في TAOO',
+    'auth.firstName': 'الاسم الأول',
+    'auth.lastName': 'اسم العائلة',
+    'auth.welcomeBonus': 'ستحصل على 50 نقطة كهدية ترحيبية!',
+    'auth.privacyTitle': 'خصوصيتك محمية',
+    'auth.privacyText': 'سنرسل لك رمز تحقق مكون من 4 أرقام عبر الرسائل النصية. قد تطبق أسعار الرسائل القياسية.',
+    'auth.errorFirstLastName': 'الرجاء إدخال اسمك الأول واسم العائلة',
+    'auth.errorValidPhone': 'الرجاء إدخال رقم هاتف سعودي صالح',
+    'auth.errorComplete4Digit': 'الرجاء إدخال الرمز الكامل المكون من 4 أرقام',
+    'auth.errorSendOTP': 'فشل إرسال الرمز. الرجاء المحاولة مرة أخرى.',
+    'auth.errorRegistration': 'فشل التسجيل. الرجاء المحاولة مرة أخرى.',
+    'auth.errorResend': 'فشل إعادة إرسال الرمز. الرجاء المحاولة مرة أخرى.',
+    'auth.successCodeSent': 'تم إرسال رمز التحقق!',
     'header.search': 'البحث عن المتاجر والمنتجات',
     'nav.home': 'الرئيسية',
     'nav.stores': 'المتاجر',
     'nav.deals': 'العروض',
     'nav.wallet': 'المحفظة',
     'nav.account': 'الحساب',
-    'home.promotions': 'العروض الترويجية',
+  'nav.convert': 'تحويل',
+  'home.promotions': 'العروض الترويجية',
+  'home.discountUpTo': 'حتى {{percent}} خصم',
+  'home.tripIstanbul7Days': '7 أيام في إسطنبول',
     'home.partnerStores': 'المتاجر الشريكة',
     'home.earnPoints': 'اكسب النقاط!',
     'home.earnPointsDesc': 'تسوق من المتاجر الشريكة واكسب نقاطاً مع كل عملية شراء',
@@ -436,6 +653,49 @@ const translations = {
     'home.viewStore': 'عرض المتجر',
     'deals.title': 'العروض',
     'deals.upgradeNow': 'ترقية الآن',
+    'deals.upgradeTitle': 'ترقية مستوى حسابك',
+    'deals.upgradeDesc': 'افتح العروض المميزة والحصرية! قم بالترقية إلى الفضي أو الذهبي للوصول إلى جميع المحتويات المميزة.',
+    'deals.currentLevel': 'الحالي: أساسي',
+    'deals.targetLevel': '← فضي/ذهبي',
+    // تفاصيل العرض (minimal)
+    'dealDetail.title': 'تفاصيل العرض',
+    'dealDetail.offer': 'عرض',
+    'dealDetail.unavailable': 'العرض غير متاح',
+    'dealDetail.daysCount': '{{count}} أيام',
+    'dealDetail.voucherValidity': 'قسيمة صالحة لمدة {{count}} أيام بعد شراء العرض',
+    // Convert Screen
+    'convert.back': 'عودة',
+    'convert.pointsYouHave': 'لديك هذا الكمية من النقاط معنا',
+    'convert.category': 'تصنيف',
+    'convert.all': 'الكل',
+    'convert.featured': 'منشورية',
+    'convert.recent': 'حديثة',
+    'convert.get': 'احصل',
+    'convert.additionalInfo': 'معلومات إضافية',
+    'convert.termsOfUse': 'شروط الإستخدام',
+    'convert.howToUsePoints': 'كيف يمكن استخدام النقاط',
+    'convert.whatTaooOffers': 'ماذا تقدم Taoo',
+    'convert.getMorePoints': 'كيفية الحصول على نقاط إضافية',
+    'convert.days': 'أيام',
+    'convert.points': 'نقاط',
+    'convert.posts': 'منشورات',
+    'convert.categoryGiftCards': 'بطاقات الهدايا 🎁',
+    'convert.categoryGeneralProducts': 'منتجات عامة 📱',
+    'convert.categoryChineseCourses': 'دورات صينية 🎓',
+    'convert.categoryFlouciTransactions': 'معاملات فلوسي 💰',
+    'convert.categoryTravelAgencies': 'وكالات السفر ✈️',
+    // Deals Screen
+    'deals.viewAll': 'عرض الكل',
+    'deals.featured': '⭐ مميز',
+    'deals.restaurantsGastronomy': 'مطاعم وطعام',
+    'deals.sportFitness': 'رياضة ولياقة',
+    'deals.opticsVision': 'نظارات ورؤية',
+    'deals.technologyGaming': 'تكنولوجيا وألعاب',
+    'deals.educationLeisure': 'تعليم وترفيه',
+    'deals.entertainmentRelaxation': 'ترفيه واسترخاء',
+    'deals.discountPercent': 'خصم {{percent}}%',
+    'deals.discountMoney': 'خصم {{amount}} دينار',
+    'deals.specialOffer': 'عرض خاص',
     'stores.title': 'المتاجر',
     'stores.all': 'الكل',
     'stores.food': 'طعام',
@@ -443,10 +703,13 @@ const translations = {
     'stores.highTech': 'تقنية عالية',
     'stores.education': 'تعليم',
     'stores.beauty': 'جمال',
-    'stores.health': 'صحة',
+    'stores.health': 'الصحة',
     'stores.searchPlaceholder': 'البحث عن المتاجر...',
     'stores.noResults': 'لم يتم العثور على متاجر',
     'stores.cashback': 'استرداد نقدي',
+    'stores.featuredPartners': 'الشركاء المميزون',
+    'stores.allStores': 'جميع المتاجر',
+    'stores.storesCount': '({{count}})',
     'wallet.title': 'محفظتي',
     'wallet.availablePoints': 'النقاط المتاحة',
     'wallet.estimated': 'تقديري',
@@ -541,6 +804,20 @@ const translations = {
     'account.name': 'الاسم',
     'account.phone': 'الهاتف',
     'account.upgrade': 'ترقية الحساب',
+    'account.currentLevel': 'مستواك الحالي',
+    'account.favorites': 'المفضلة',
+    'account.favoritesDesc': 'العروض والمتاجر المفضلة',
+    'account.interests': 'الاهتمامات',
+    'account.interestsDesc': 'كل اهتماماتك',
+    'account.records': 'السجلات',
+    'account.recordsDesc': 'المشتريات والمسح السابقة',
+    'account.helpDesc': 'الدعم والأسئلة الشائعة',
+    'account.chooseLanguage': 'اختر لغتك',
+    'account.appearance': 'المظهر',
+    'account.appearanceDesc': 'الوضع الفاتح أو الداكن',
+    'account.terms': 'شروط الخدمة',
+    'account.deleteAccount': 'حذف الحساب',
+    'wallet.allTransactions': 'كل معاملاتك',
     'language.choose': 'اختر اللغة',
     'language.current': 'اللغة الحالية',
     'language.changed': 'تم تغيير اللغة',
@@ -586,6 +863,7 @@ interface LanguageProviderProps {
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>('fr');
   const [isLoading, setIsLoading] = useState(true);
+  const [isReloading, setIsReloading] = useState(false);
 
   // Load saved language on mount
   useEffect(() => {
@@ -596,6 +874,9 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     try {
       const savedLanguage = await AsyncStorage.getItem('app_language');
       if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'fr' || savedLanguage === 'ar')) {
+        const isRTL = savedLanguage === 'ar';
+        I18nManager.allowRTL(isRTL);
+        I18nManager.forceRTL(isRTL);
         setLanguage(savedLanguage as Language);
         console.log('Loaded language:', savedLanguage);
       }
@@ -609,37 +890,90 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const changeLanguage = async (newLanguage: Language) => {
     try {
       console.log('Changing language to:', newLanguage);
+      
+      const wasRTL = I18nManager.isRTL;
+      const willBeRTL = newLanguage === 'ar';
+      
+      // Save the language first
       setLanguage(newLanguage);
       await AsyncStorage.setItem('app_language', newLanguage);
       console.log('Language saved:', newLanguage);
+      
+      // Check if RTL state needs to change
+      if (wasRTL !== willBeRTL) {
+        I18nManager.allowRTL(willBeRTL);
+        I18nManager.forceRTL(willBeRTL);
+        
+        // Show loading screen
+        setIsReloading(true);
+        
+        // Wait a moment for the loading screen to render
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Try to reload the app
+        try {
+          // Method 1: Try DevSettings reload (works in development)
+          if (__DEV__ && NativeModules.DevSettings) {
+            NativeModules.DevSettings.reload();
+          } else {
+            // Method 2: Show alert for manual restart
+            setIsReloading(false);
+            Alert.alert(
+              'Restart Required',
+              'Please close and reopen the app for the language direction to take effect.',
+              [{ text: 'OK' }]
+            );
+          }
+        } catch (reloadError) {
+          console.log('Could not auto-reload, showing alert');
+          setIsReloading(false);
+          Alert.alert(
+            'Restart Required',
+            'Please close and reopen the app for the language direction to take effect.',
+            [{ text: 'OK' }]
+          );
+        }
+      }
     } catch (error) {
       console.error('Error saving language:', error);
+      setIsReloading(false);
     }
   };
 
-  const t = (key: string): string => {
-    return (translations as any)[language][key] || key;
+  const t = (key: string, vars?: Record<string, string | number>): string => {
+    let template: string = (translations as any)[language][key] || key;
+    if (vars) {
+      template = template.replace(/\{\{(\w+)\}\}/g, (_match, varName) => {
+        const value = vars[varName as keyof typeof vars];
+        return value !== undefined && value !== null ? String(value) : `{{${varName}}}`;
+      });
+    }
+    return template;
   };
 
-  React.useEffect(() => {
-    if (language === 'ar') {
-      try {
-        I18nManager.allowRTL(true);
-      } catch {}
-    } else {
-      try {
-        I18nManager.allowRTL(false);
-      } catch {}
-    }
-  }, [language]);
+  const isRTL = language === 'ar';
 
   if (isLoading) {
     return null;
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, t }}>
-      <>{children}</>
+    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, t, isRTL, isReloading }}>
+      {isReloading ? (
+        <View style={reloadStyles.container}>
+          <View style={reloadStyles.content}>
+            <ActivityIndicator size="large" color="#EAB308" />
+            <Text style={reloadStyles.text}>
+              {language === 'ar' ? 'جاري تحميل التطبيق...' : language === 'fr' ? 'Chargement de l\'application...' : 'Loading app...'}
+            </Text>
+            <Text style={reloadStyles.subtext}>
+              {language === 'ar' ? 'الرجاء الانتظار' : language === 'fr' ? 'Veuillez patienter' : 'Please wait'}
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <>{children}</>
+      )}
     </LanguageContext.Provider>
   );
 }
@@ -651,3 +985,27 @@ export function useLanguage() {
   }
   return context;
 }
+
+const reloadStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    alignItems: 'center',
+    padding: 24,
+  },
+  text: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  subtext: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#6B7280',
+  },
+});

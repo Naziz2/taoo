@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useUser } from '../contexts/UserContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
@@ -21,51 +22,15 @@ interface DailyRewardsWheelProps {
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'DailyRewards'>;
 
-// Account level configuration
-const accountLevels = {
-  basic: { dailyCheckinPoints: 1, displayName: 'Basic' },
-  silver: { dailyCheckinPoints: 5, displayName: 'Silver' },
-  gold: { dailyCheckinPoints: 7, displayName: 'Gold' },
-};
-
 export default function DailyRewardsWheel({ onPointsWon }: DailyRewardsWheelProps) {
   const { user } = useUser();
+  const { t } = useLanguage();
   const navigation = useNavigation<NavigationProp>();
-  const [currentDay] = useState(Math.floor(Math.random() * 6) + 1); // 1-6 to show progress
-
-  // Get user's daily check-in points based on their level
-  const userLevel = user?.level || 'basic';
-  const dailyPoints = accountLevels[userLevel as keyof typeof accountLevels]?.dailyCheckinPoints || 1;
-
-  const getDayStatus = (day: number) => {
-    if (day <= currentDay) return 'completed';
-    if (day === currentDay + 1) return 'current';
-    return 'locked';
-  };
-
-  const getDayIcon = (day: number) => {
-    const status = getDayStatus(day);
-    if (status === 'completed') return '✓';
-    if (day === 7) return '🎁';
-    return day.toString();
-  };
-
-  const getDayColor = (day: number) => {
-    const status = getDayStatus(day);
-    switch (status) {
-      case 'completed': return styles.dayCompleted;
-      case 'current': return styles.dayCurrent;
-      case 'locked': return styles.dayLocked;
-      default: return styles.dayLocked;
-    }
-  };
+  const [hasSpunToday, setHasSpunToday] = useState(false);
 
   const handlePlayNow = () => {
     navigation.navigate('DailyRewards');
   };
-
-  // Check if user completed 7 days
-  const isDay7 = currentDay === 7;
 
   return (
     <ImageBackground
@@ -80,32 +45,30 @@ export default function DailyRewardsWheel({ onPointsWon }: DailyRewardsWheelProp
       <View style={styles.contentContainer}>
         {/* Header Section */}
         <View style={styles.headerSection}>
-          {!isDay7 ? (
-            <View style={styles.headerLeft}>
-              <Text style={styles.headerTitle}>Récompense quotidienne</Text>
-              <Text style={styles.headerSubtitle}>vous avez reçu</Text>
-              <View style={styles.pointsDisplay}>
-                <Text style={styles.pointsText}>+ {dailyPoints}</Text>
-                <View style={styles.coinIcon}>
-                  <MaterialCommunityIcons name="circle-multiple" size={20} color="#EAB308" />
-                </View>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle}>{t('dailyRewards.title')}</Text>
+            <Text style={styles.headerSubtitle}>{t('dailyRewards.subtitleUpTo')}</Text>
+            <View style={styles.pointsDisplay}>
+              <Text style={styles.pointsText}>2000</Text>
+              <View style={styles.coinIcon}>
+                <MaterialCommunityIcons name="circle-multiple" size={20} color="#EAB308" />
               </View>
             </View>
-          ) : (
-            <TouchableOpacity style={styles.headerLeft} onPress={handlePlayNow} activeOpacity={0.8}>
-              <Text style={styles.headerTitle}>Bravo!</Text>
-              <Text style={styles.headerSubtitle}>Récompense pour votre série de 7 jours</Text>
-              <View style={styles.pointsDisplay}>
-                <Text style={styles.pointsText}>2000</Text>
-                <View style={styles.coinIcon}>
-                  <MaterialCommunityIcons name="circle-multiple" size={20} color="#EAB308" />
-                </View>
+            
+            {!hasSpunToday && (
+              <TouchableOpacity style={styles.playButton} onPress={handlePlayNow} activeOpacity={0.8}>
+                <Text style={styles.playButtonText}>{t('dailyRewards.playNow')}</Text>
+                <MaterialCommunityIcons name="chevron-right" size={16} color="#1F2937" />
+              </TouchableOpacity>
+            )}
+
+            {hasSpunToday && (
+              <View style={styles.completedBadge}>
+                <MaterialCommunityIcons name="check-circle" size={16} color="#10B981" />
+                <Text style={styles.completedText}>{t('dailyRewards.alreadyPlayedToday')}</Text>
               </View>
-              <View style={styles.playButton}>
-                <Text style={styles.playButtonText}>Tournez la roue</Text>
-              </View>
-            </TouchableOpacity>
-          )}
+            )}
+          </View>
 
           {/* Wheel Preview */}
           <View style={styles.wheelPreview}>
@@ -113,46 +76,27 @@ export default function DailyRewardsWheel({ onPointsWon }: DailyRewardsWheelProp
               <MaterialCommunityIcons name="google-circles-communities" size={120} color="#EAB308" />
               {/* Pointer */}
               <View style={styles.pointer}>
-                <MaterialCommunityIcons name="menu-down" size={24} color="#FFFFFF" />
+                <View style={styles.pointerTriangle} />
               </View>
             </View>
             {/* Gift decoration */}
             <View style={styles.giftDecoration}>
-              <MaterialCommunityIcons name="gift" size={24} color="#FFFFFF" />
+              <MaterialCommunityIcons name="trophy" size={24} color="#FFFFFF" />
             </View>
           </View>
         </View>
 
-        {/* 7-Day Progress */}
-        {!isDay7 && (
-          <View style={styles.progressSection}>
-            <Text style={styles.progressText}>
-              Plus que <Text style={styles.progressHighlight}>{7 - currentDay} jours</Text> pour accéder au GRAND PRIX
-            </Text>
-
-            {/* Progress Chain */}
-            <View style={styles.progressChain}>
-              {[1, 2, 3, 4, 5, 6, 7].map((day, index) => (
-                <React.Fragment key={day}>
-                  <View style={[styles.dayCircle, getDayColor(day)]}>
-                    <Text style={[styles.dayText, day <= currentDay && styles.dayTextCompleted]}>
-                      {getDayIcon(day)}
-                    </Text>
-                  </View>
-                  {index < 6 && (
-                    <View style={[styles.connector, day <= currentDay && styles.connectorActive]} />
-                  )}
-                </React.Fragment>
-              ))}
-            </View>
-
-            {/* Grand Prize Badge */}
-            <View style={styles.grandPrizeBadge}>
-              <MaterialCommunityIcons name="trophy" size={16} color="#1F2937" />
-              <Text style={styles.grandPrizeText}>GRAND PRIX: jusqu'à 2000 pts</Text>
-            </View>
+        {/* Info Section */}
+        <View style={styles.infoSection}>
+          <View style={styles.infoItem}>
+            <MaterialCommunityIcons name="clock-outline" size={16} color="#EAB308" />
+            <Text style={styles.infoText}>{t('dailyRewards.chancePerDay')}</Text>
           </View>
-        )}
+          <View style={styles.infoItem}>
+            <MaterialCommunityIcons name="star" size={16} color="#EAB308" />
+            <Text style={styles.infoText}>{t('dailyRewards.rewardsRange')}</Text>
+          </View>
+        </View>
       </View>
     </ImageBackground>
   );
@@ -234,16 +178,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   playButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 24,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 20,
     alignSelf: 'flex-start',
+    gap: 4,
   },
   playButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#1F2937',
+  },
+  completedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#10B981',
+  },
+  completedText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10B981',
   },
   wheelPreview: {
     position: 'relative',
@@ -260,6 +224,18 @@ const styles = StyleSheet.create({
     left: '50%',
     marginLeft: -12,
   },
+  pointerTriangle: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderBottomWidth: 20,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#EF4444',
+  },
   giftDecoration: {
     position: 'absolute',
     bottom: -8,
@@ -267,82 +243,27 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 8,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#EAB308',
     alignItems: 'center',
     justifyContent: 'center',
     transform: [{ rotate: '12deg' }],
   },
-  progressSection: {
+  infoSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
+    marginTop: 16,
   },
-  progressText: {
-    fontSize: 13,
-    fontWeight: '600',
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  infoText: {
+    fontSize: 12,
+    fontWeight: '500',
     color: '#FFFFFF',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  progressHighlight: {
-    color: '#EAB308',
-    fontWeight: '700',
-  },
-  progressChain: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  dayCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayCompleted: {
-    backgroundColor: '#EAB308',
-  },
-  dayCurrent: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#EAB308',
-  },
-  dayLocked: {
-    backgroundColor: '#6B7280',
-  },
-  dayText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#D1D5DB',
-  },
-  dayTextCompleted: {
-    color: '#1F2937',
-  },
-  connector: {
-    flex: 1,
-    height: 2,
-    backgroundColor: '#6B7280',
-    marginHorizontal: 2,
-  },
-  connectorActive: {
-    backgroundColor: '#EAB308',
-  },
-  grandPrizeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#EAB308',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'center',
-    gap: 4,
-  },
-  grandPrizeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#1F2937',
   },
 });

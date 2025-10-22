@@ -6,14 +6,18 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
+  ImageBackground,
+  Image,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useUser } from '../contexts/UserContext';
 import DealCard from '../components/DealCard';
+import CoinIcon from '../components/CoinIcon';
 
 type DealsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -38,7 +42,8 @@ interface Deal {
 export default function DealsScreen() {
   const { t } = useLanguage();
   const { user } = useUser();
-  const navigation = useNavigation<DealsScreenNavigationProp>();
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const userLevel = user?.level || 'basic';
 
   const handleUpgradePress = () => {
@@ -255,11 +260,11 @@ export default function DealsScreen() {
 
   const getDiscountText = (deal: Deal) => {
     if (deal.discountType === 'PERCENT' && deal.discountPercentAmount > 0) {
-      return `${deal.discountPercentAmount}% de réduction`;
+      return t('deals.discountPercent', { percent: deal.discountPercentAmount });
     } else if (deal.discountType === 'MONEY' && deal.discountMoneyAmount > 0) {
-      return `${deal.discountMoneyAmount}DT de réduction`;
+      return t('deals.discountMoney', { amount: deal.discountMoneyAmount });
     }
-    return 'Offre spéciale';
+    return t('deals.specialOffer');
   };
 
   const canAccessPremium = userLevel === 'silver' || userLevel === 'gold';
@@ -305,7 +310,7 @@ export default function DealsScreen() {
             {title} {emoji}
           </Text>
           <TouchableOpacity>
-            <Text style={styles.viewAllText}>Tout voir</Text>
+            <Text style={styles.viewAllText}>{t('deals.viewAll')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.dealsGrid}>
@@ -326,7 +331,7 @@ export default function DealsScreen() {
                 tier={deal.vip ? 'vip' : deal.premium ? 'premium' : 'basic'}
                 onPress={() => {
                   if (!isLocked(deal)) {
-                    console.log('Deal pressed:', deal.id);
+                    navigation.navigate('DealDetail', { deal });
                   }
                 }}
                 onUpgradePress={isLocked(deal) ? handleUpgradePress : undefined}
@@ -340,17 +345,29 @@ export default function DealsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.profileButton}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <TouchableOpacity style={[styles.profileButton, { marginTop: 0 }]}
+          onPress={() => navigation.navigate('Account')}
+          activeOpacity={0.7}
+        >
           <MaterialCommunityIcons name="account" color="#6B7280" size={24} />
         </TouchableOpacity>
 
-        <Text style={styles.logo}>DO SHOPPING</Text>
+        <Image
+          source={require('../../assets/taoo_black 1.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
-        <View style={styles.pointsContainer}>
+        <TouchableOpacity 
+          style={styles.pointsContainer}
+          onPress={() => navigation.navigate('Wallet')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.pointsGlow} />
           <Text style={styles.pointsText}>{user?.points?.toLocaleString() || '0'}</Text>
-          <Text style={styles.coinIcon}>🪙</Text>
-        </View>
+          <CoinIcon size={16} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView 
@@ -360,47 +377,80 @@ export default function DealsScreen() {
         {userLevel === 'basic' && (
           <View style={styles.upgradeBanner}>
             <View style={styles.upgradeContent}>
-              <Text style={styles.upgradeTitle}>Upgrade Your Account Level</Text>
+              <Text style={styles.upgradeTitle}>{t('deals.upgradeTitle')}</Text>
               <Text style={styles.upgradeText}>
-                Unlock premium deals and exclusive offers! Upgrade to Silver or Gold to access all premium content.
+                {t('deals.upgradeDesc')}
               </Text>
               <View style={styles.upgradeInfo}>
                 <View style={styles.currentLevelBadge}>
-                  <Text style={styles.currentLevelText}>Current: Basic</Text>
+                  <Text style={styles.currentLevelText}>{t('deals.currentLevel')}</Text>
                 </View>
-                <Text style={styles.arrowText}>→ Silver/Gold</Text>
+                <Text style={styles.arrowText}>{t('deals.targetLevel')}</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.upgradeButton}>
-              <Text style={styles.upgradeButtonText}>Upgrade Now</Text>
+            <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgradePress}>
+              <Text style={styles.upgradeButtonText}>{t('deals.upgradeNow')}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         <View style={styles.featuredSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>À la une</Text>
+            <Text style={styles.featuredSectionTitle}>{t('deals.featured')}</Text>
             <TouchableOpacity>
-              <Text style={styles.viewAllText}>Tout voir</Text>
+              <Text style={styles.viewAllText}>{t('deals.viewAll')}</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.featuredDeal}>
-            <View style={styles.featuredPointsBadge}>
-              <Text style={styles.featuredPointsText}>35 pts</Text>
-            </View>
-            <View style={styles.featuredContent}>
-              <Text style={styles.featuredTitle}>Friends Pasta Bar</Text>
-              <Text style={styles.featuredSubtitle}>Offre de Bienvenue</Text>
-            </View>
-          </TouchableOpacity>
+          {dealsData.length > 0 && (
+            <TouchableOpacity 
+              style={styles.featuredDeal}
+              onPress={() => {
+                if (!isLocked(dealsData[0])) {
+                  navigation.navigate('DealDetail', { deal: dealsData[0] });
+                }
+              }}
+            >
+              <ImageBackground
+                source={{ uri: dealsData[0].thumbnail }}
+                style={styles.featuredDealContent}
+                imageStyle={{ borderRadius: 16 }}
+              >
+                <View style={styles.featuredDealOverlay}>
+                  <View style={styles.featuredDealTop}>
+                    <View style={styles.featuredBadgeContainer}>
+                      <View style={styles.featuredPointsBadge}>
+                        <Text style={styles.featuredPointsText}>{dealsData[0].pointSellPrice} pts</Text>
+                      </View>
+                      {dealsData[0].premium && (
+                        <View style={[styles.premiumBadge, { backgroundColor: dealsData[0].vip ? '#FFD700' : '#C0C0C0' }]}>
+                          <Text style={styles.premiumBadgeText}>{dealsData[0].vip ? 'VIP' : 'PREMIUM'}</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                  <View style={styles.featuredContent}>
+                    <Text style={[styles.featuredCompany, { color: dealsData[0].textColor }]}>
+                      {dealsData[0].companies[0]?.name}
+                    </Text>
+                    <Text style={[styles.featuredTitle, { color: dealsData[0].titleColor }]}>
+                      {dealsData[0].title}
+                    </Text>
+                    <Text style={[styles.featuredDiscount, { color: dealsData[0].textColor }]}>
+                      {getDiscountText(dealsData[0])}
+                    </Text>
+                  </View>
+                </View>
+              </ImageBackground>
+            </TouchableOpacity>
+          )}
         </View>
 
-        <DealSection title="Restaurants & Gastronomie" deals={restaurantDeals} emoji="🍽️" />
-        <DealSection title="Sport & Fitness" deals={sportDeals} emoji="💪" />
-        <DealSection title="Optique & Vision" deals={opticDeals} emoji="👓" />
-        <DealSection title="Technologie & Gaming" deals={techDeals} emoji="🎮" />
-        <DealSection title="Éducation & Loisirs" deals={educationDeals} emoji="📚" />
-        <DealSection title="Divertissement & Détente" deals={entertainmentDeals} emoji="🎯" />
+        <DealSection title={t('deals.restaurantsGastronomy')} deals={restaurantDeals} emoji="🍽️" />
+        <DealSection title={t('deals.sportFitness')} deals={sportDeals} emoji="💪" />
+        <DealSection title={t('deals.opticsVision')} deals={opticDeals} emoji="👓" />
+        <DealSection title={t('deals.technologyGaming')} deals={techDeals} emoji="🎮" />
+        <DealSection title={t('deals.educationLeisure')} deals={educationDeals} emoji="📚" />
+        <DealSection title={t('deals.entertainmentRelaxation')} deals={entertainmentDeals} emoji="🎯" />
 
         <View style={{ height: 80 }} />
       </ScrollView>
@@ -434,27 +484,42 @@ const styles = StyleSheet.create({
     borderColor: '#EAB308',
   },
   logo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#EAB308',
-    letterSpacing: 1,
+    height: 28,
+    width: 120,
   },
   pointsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FEF3C7',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 24,
+    position: 'relative',
+    overflow: 'hidden',
+    shadowColor: '#EAB308',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: '#FDE68A',
+  },
+  pointsGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(234, 179, 8, 0.1)',
   },
   pointsText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#000000',
     marginRight: 4,
   },
   coinIcon: {
-    fontSize: 14,
+    fontSize: 16,
   },
   content: {
     flex: 1,
@@ -521,6 +586,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  featuredSectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -531,20 +601,51 @@ const styles = StyleSheet.create({
     color: '#3B82F6',
   },
   featuredDeal: {
-    backgroundColor: '#D1D5DB',
-    height: 130,
-    borderRadius: 12,
-    padding: 16,
-    justifyContent: 'space-between',
+    height: 200,
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
-  featuredPointsBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#EAB308',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  featuredDealContent: {
+    flex: 1,
     borderRadius: 16,
   },
+  featuredDealOverlay: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  featuredDealTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  featuredBadgeContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  featuredPointsBadge: {
+    backgroundColor: '#EAB308',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
   featuredPointsText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  premiumBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  premiumBadgeText: {
     fontSize: 12,
     fontWeight: 'bold',
     color: '#111827',
@@ -552,17 +653,26 @@ const styles = StyleSheet.create({
   featuredContent: {
     alignItems: 'flex-start',
   },
+  featuredCompany: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
   featuredTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#111827',
+    marginBottom: 6,
+  },
+  featuredDiscount: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   featuredSubtitle: {
     fontSize: 14,
     color: '#6B7280',
   },
   section: {
-    marginTop: 24,
+    marginTop: 28,
     paddingHorizontal: 16,
   },
   dealsGrid: {
@@ -573,6 +683,6 @@ const styles = StyleSheet.create({
   dealItem: {
     width: '50%',
     paddingHorizontal: 6,
-    marginBottom: 12,
+    marginBottom: 14,
   },
 });

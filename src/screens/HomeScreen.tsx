@@ -9,9 +9,11 @@ import {
   TextInput,
   ImageBackground,
   Alert,
+  Image,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -21,6 +23,7 @@ import PromotionCard from '../components/PromotionCard';
 import GiftCard from '../components/GiftCard';
 import PartnerStore from '../components/PartnerStore';
 import DailyRewardsWheel from '../components/DailyRewardsWheel';
+import CoinIcon from '../components/CoinIcon';
 import type { MainTabParamList, RootStackParamList } from '../navigation/AppNavigator';
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
@@ -32,6 +35,7 @@ export default function HomeScreen() {
   const { t } = useLanguage();
   const { user } = useUser();
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const insets = useSafeAreaInsets();
   const [showDailyRewards, setShowDailyRewards] = useState(false);
 
   const partners = [
@@ -44,11 +48,11 @@ export default function HomeScreen() {
   const sampleDeals = {
     fashionSale: {
       thumbnail: 'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=800',
-      discount: 'Up to 50% off',
+      discount: t('home.discountUpTo', { percent: '50%' }),
     },
     summerSale: {
       thumbnail: 'https://scontent.ftun14-1.fna.fbcdn.net/v/t39.30808-6/468068063_10169935301505486_5007459974403657300_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=101&ccb=1-7&_nc_sid=0b6b33&_nc_ohc=UPDH2rdpW7gQ7kNvwFfW3Xr&_nc_oc=AdnkvKx8eNp_hQVkIHBX8w9ZmevCXLDRPdGOZhZrJpEe_TBGGqwYKeTZTx03LsKAg2A&_nc_zt=23&_nc_ht=scontent.ftun14-1.fna&_nc_gid=MDeO69tZxufuZn6NdEqwTg&oh=00_AfU-79k8BcrPsCV3j0o6vnExSXdzh_8zm7Ws4wfENr5qPQ&oe=68A0F51B',
-      discount: 'Up to 70% off',
+      discount: t('home.discountUpTo', { percent: '70%' }),
     },
     giftCard50: {
       thumbnail: 'https://www.pluxee.tn/sites/g/files/jclxxe421/files/styles/plx_cards_main_products/public/2024-12/repas%20cheque%20maroc.jpg.webp?itok=LFKLaX2e',
@@ -65,7 +69,7 @@ export default function HomeScreen() {
     parisTrip: {
       thumbnail: 'https://image.resabooking.com/images/images_og/img_p_hotel_og_1065.jpg',
       points: 19560,
-      title: '7 Jours à Istanbul',
+      title: t('home.tripIstanbul7Days'),
     },
     geantPromo: {
       thumbnail: 'https://www.tunisianet.com.tn/modules/wbimageslider/views/img/b610ae3f3b20262c0c936625ac3d38834d6f8a3f_tv%20samsung%20promo.jpg',
@@ -129,24 +133,29 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.profileButton}
+  <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <TouchableOpacity
+          style={[styles.profileButton, { marginTop: 0 }]}
           onPress={handleAccountPress}
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons name="account" color="#6B7280" size={24} />
         </TouchableOpacity>
 
-        <Text style={styles.logo}>DO SHOPPING</Text>
+        <Image
+          source={require('../../assets/taoo_black 1.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
         <TouchableOpacity 
           style={styles.pointsContainer}
           onPress={handlePointsPress}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
+          <View style={styles.pointsGlow} />
           <Text style={styles.pointsText}>{user?.points?.toLocaleString() || '0'}</Text>
-          <Text style={styles.coinIcon}>🪙</Text>
+          <CoinIcon size={16} />
         </TouchableOpacity>
       </View>
 
@@ -203,11 +212,11 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>{t('home.partnerStores')}</Text>
           <View style={styles.partnersGrid}>
             {partners.map((partner) => (
-              <TouchableOpacity 
-                key={partner.name}
-                onPress={() => handlePartnerPress(partner.name)}
-                activeOpacity={0.7}
-              >
+              <TouchableOpacity
+                  key={partner.name}
+                  onPress={() => navigation.navigate('StoreDetail', { store: partner })}
+                  activeOpacity={0.7}
+                >
                 <PartnerStore
                   name={partner.name}
                   logo={partner.logo}
@@ -277,7 +286,7 @@ export default function HomeScreen() {
                   </View>
                   <View style={styles.premiumPoints}>
                     <Text style={styles.premiumPointsText}>{sampleDeals.parisTrip.points}</Text>
-                    <Text style={styles.coinIcon}>🪙</Text>
+                    <CoinIcon size={14} />
                   </View>
                 </View>
                 <View style={styles.premiumOfferFooter}>
@@ -344,27 +353,42 @@ const styles = StyleSheet.create({
     borderColor: '#EAB308',
   },
   logo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#EAB308',
-    letterSpacing: 1,
+    height: 28,
+    width: 120,
   },
   pointsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FEF3C7',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 24,
+    position: 'relative',
+    overflow: 'hidden',
+    shadowColor: '#EAB308',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: '#FDE68A',
+  },
+  pointsGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(234, 179, 8, 0.1)',
   },
   pointsText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#000000',
     marginRight: 4,
   },
   coinIcon: {
-    fontSize: 14,
+    fontSize: 16,
   },
   searchContainer: {
     flexDirection: 'row',

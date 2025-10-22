@@ -8,12 +8,16 @@ import {
   Animated,
   Dimensions,
   Alert,
+  Image,
 } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useUser } from '../contexts/UserContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import SpinWheel from '../components/SpinWheel';
+import CanvasWheel, { CanvasWheelHandle } from '../components/CanvasWheel';
 
 type DailyRewardsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'DailyRewards'>;
 
@@ -30,23 +34,25 @@ const WHEEL_SIZE = width * 0.7;
 export default function DailyRewardsScreen() {
   const navigation = useNavigation<DailyRewardsScreenNavigationProp>();
   const { user } = useUser();
+  const { t } = useLanguage();
   
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation] = useState(new Animated.Value(0));
+  const wheelRef = React.useRef<CanvasWheelHandle>(null);
   const [currentDay, setCurrentDay] = useState(7); // User has completed 7 days
   const [canPlay, setCanPlay] = useState(true);
   const [wonPoints, setWonPoints] = useState<number | null>(null);
 
   // Wheel segments with point values and probabilities
   const segments: WheelSegment[] = [
-    { value: 100, color: '#f0932b', angle: 0, prob: 0.10 },
-    { value: 20, color: '#f9ca24', angle: 45, prob: 0.30 },
-    { value: 200, color: '#f0932b', angle: 90, prob: 0.10 },
-    { value: 2000, color: '#f9ca24', angle: 135, prob: 0.01 },
-    { value: 50, color: '#f0932b', angle: 180, prob: 0.40 },
-    { value: 1000, color: '#f9ca24', angle: 225, prob: 0.02 },
-    { value: 500, color: '#f0932b', angle: 270, prob: 0.04 },
-    { value: 700, color: '#f9ca24', angle: 315, prob: 0.03 },
+    { value: 50, color: '#1F2937', angle: 0, prob: 0.40 },
+    { value: 100, color: '#EAB308', angle: 45, prob: 0.10 },
+    { value: 20, color: '#1F2937', angle: 90, prob: 0.30 },
+    { value: 500, color: '#EAB308', angle: 135, prob: 0.04 },
+    { value: 200, color: '#1F2937', angle: 180, prob: 0.10 },
+    { value: 1000, color: '#EAB308', angle: 225, prob: 0.02 },
+    { value: 700, color: '#1F2937', angle: 270, prob: 0.03 },
+    { value: 2000, color: '#EAB308', angle: 315, prob: 0.01 },
   ];
 
   const generateWeightedRandom = (): WheelSegment | null => {
@@ -80,31 +86,20 @@ export default function DailyRewardsScreen() {
       setIsSpinning(false);
       return;
     }
-    
-    // Calculate final rotation to land on selected segment
-    const randomRotation = 1800 - selectedSegment.angle + 20;
-    
-    Animated.timing(rotation, {
-      toValue: randomRotation,
-      duration: 3000,
-      useNativeDriver: true,
-    }).start(() => {
+    // Spin canvas wheel to the selected label
+    try {
+      wheelRef.current?.spinTo(String(selectedSegment.value));
+      // onSpinComplete will finalize state
+    } catch (e) {
+      // Fallback: finish immediately
       setIsSpinning(false);
       setWonPoints(selectedSegment.value);
       setCanPlay(false);
-      
-      Alert.alert(
-        'Félicitations! 🎉',
-        `Vous avez gagné ${selectedSegment.value} points!`,
-        [{ text: 'OK' }]
-      );
-    });
+  Alert.alert(t('dailyRewards.congratsTitle'), t('dailyRewards.youWonPoints', { points: selectedSegment.value }), [{ text: 'OK' }]);
+    }
   };
 
-  const rotateInterpolate = rotation.interpolate({
-    inputRange: [0, 360],
-    outputRange: ['0deg', '360deg'],
-  });
+  const rotateInterpolate = rotation.interpolate({ inputRange: [0, 360], outputRange: ['0deg', '360deg'] });
 
   return (
     <View style={styles.container}>
@@ -117,7 +112,7 @@ export default function DailyRewardsScreen() {
         >
           <MaterialCommunityIcons name="chevron-left" size={28} color="#1F2937" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Roue de la Fortune</Text>
+  <Text style={styles.headerTitle}>{t('dailyRewards.title')}</Text>
         <TouchableOpacity
           style={styles.pointsBadge}
           activeOpacity={0.8}
@@ -133,66 +128,63 @@ export default function DailyRewardsScreen() {
           {/* Prize Badge */}
           <View style={styles.prizeBadge}>
             <MaterialCommunityIcons name="trophy" size={20} color="#1F2937" />
-            <Text style={styles.prizeBadgeText}>Cadeau Spécial</Text>
+            <Text style={styles.prizeBadgeText}>{t('dailyRewards.specialGift')}</Text>
           </View>
 
           {/* Wheel Container */}
           <View style={styles.wheelContainer}>
             <View style={styles.wheelWrapper}>
-              <Animated.View
-                style={[
-                  styles.wheel,
-                  { transform: [{ rotate: rotateInterpolate }] },
-                ]}
-              >
-                {/* Wheel segments */}
-                {segments.map((segment, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.segment,
-                      {
-                        backgroundColor: segment.color,
-                        transform: [{ rotate: `${segment.angle}deg` }],
-                      },
-                    ]}
-                  >
-                    <Text style={styles.segmentText}>{segment.value}</Text>
-                  </View>
-                ))}
-                
-                {/* Center circle */}
-                <View style={styles.centerCircle}>
-                  <MaterialCommunityIcons name="circle-multiple" size={32} color="#EAB308" />
-                </View>
-              </Animated.View>
-
-              {/* Pointer */}
-              <View style={styles.pointer}>
-                <MaterialCommunityIcons name="menu-down" size={40} color="#FFFFFF" />
+              
+              {/* Pointer removed as requested */}
+              
+              {/* Animated Wheel */}
+              {/* Use Canvas-based wheel inside WebView */}
+              <View style={styles.wheelAnimated}>
+                <CanvasWheel
+                  ref={wheelRef}
+                  size={WHEEL_SIZE}
+                  labels={segments.map(s => String(s.value))}
+                  pointsLabel={t('points.abbr')}
+                  onSpinComplete={(label) => {
+                    const val = Number(label);
+                    setIsSpinning(false);
+                    setWonPoints(val);
+                    setCanPlay(false);
+                    Alert.alert(t('dailyRewards.congratsTitle'), t('dailyRewards.youWonPoints', { points: val }), [{ text: 'OK' }]);
+                  }}
+                />
+                {/* Frame overlay to match the metal ring */}
+                <Image
+                  source={require('../../assets/wheel-frame.png')}
+                  style={{
+                    position: 'absolute',
+                    width: WHEEL_SIZE * 1.15,
+                    height: WHEEL_SIZE * 1.15,
+                    top: -WHEEL_SIZE * 0.075,
+                    left: -WHEEL_SIZE * 0.075,
+                  }}
+                  resizeMode="contain"
+                />
               </View>
+
+              {/* Center spin button overlay */}
+              <TouchableOpacity
+                style={styles.centerButton}
+                onPress={handleSpin}
+                disabled={!canPlay || isSpinning}
+                activeOpacity={0.8}
+              >
+                <View style={styles.centerButtonCircle}>
+                  <Text style={styles.centerButtonText}>🎯</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
-
-          {/* Spin Button */}
-          <TouchableOpacity
-            style={[
-              styles.spinButton,
-              (!canPlay || isSpinning) && styles.spinButtonDisabled,
-            ]}
-            onPress={handleSpin}
-            disabled={!canPlay || isSpinning}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.spinButtonText}>
-              {isSpinning ? 'Rotation...' : canPlay ? 'Tournez la roue' : 'Déjà joué'}
-            </Text>
-          </TouchableOpacity>
 
           {/* Win Result */}
           {wonPoints && (
             <View style={styles.winResult}>
-              <Text style={styles.winTitle}>Félicitations !</Text>
+              <Text style={styles.winTitle}>{t('dailyRewards.congratsTitle')}</Text>
               <View style={styles.winPoints}>
                 <Text style={styles.winPointsText}>+{wonPoints}</Text>
                 <MaterialCommunityIcons name="circle-multiple" size={24} color="#EAB308" />
@@ -203,28 +195,28 @@ export default function DailyRewardsScreen() {
 
         {/* Info Card */}
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Gagnez jusqu'à 2000 points</Text>
-          <Text style={styles.infoDescription}>Tournez la roue pour gagner des points</Text>
+          <Text style={styles.infoTitle}>{t('dailyRewards.infoTitle')}</Text>
+          <Text style={styles.infoDescription}>{t('dailyRewards.infoDesc')}</Text>
         </View>
 
         {/* Play Status */}
         {!canPlay && (
           <View style={styles.statusCard}>
             <MaterialCommunityIcons name="star" size={24} color="#10B981" />
-            <Text style={styles.statusText}>Mission accomplie! Revenez demain.</Text>
+            <Text style={styles.statusText}>{t('dailyRewards.missionAccomplished')}</Text>
           </View>
         )}
 
         {/* Game Rules */}
         <View style={styles.rulesCard}>
-          <Text style={styles.rulesTitle}>Règles du jeu</Text>
+          <Text style={styles.rulesTitle}>{t('dailyRewards.rulesTitle')}</Text>
           
           <View style={styles.ruleItem}>
             <View style={[styles.ruleIcon, { backgroundColor: '#DBEAFE' }]}>
               <MaterialCommunityIcons name="calendar" size={20} color="#3B82F6" />
             </View>
             <Text style={styles.ruleText}>
-              Connectez-vous 7 jours consécutifs pour le grand prix
+              {t('dailyRewards.ruleStreak')}
             </Text>
           </View>
 
@@ -233,7 +225,7 @@ export default function DailyRewardsScreen() {
               <MaterialCommunityIcons name="trophy" size={20} color="#A855F7" />
             </View>
             <Text style={styles.ruleText}>
-              Les points gagnés sont ajoutés immédiatement à votre solde
+              {t('dailyRewards.ruleInstant')}
             </Text>
           </View>
 
@@ -242,7 +234,7 @@ export default function DailyRewardsScreen() {
               <MaterialCommunityIcons name="star" size={20} color="#EAB308" />
             </View>
             <Text style={styles.ruleText}>
-              Manquer un jour remet le compteur à zéro
+              {t('dailyRewards.ruleMissedResets')}
             </Text>
           </View>
         </View>
@@ -326,50 +318,79 @@ const styles = StyleSheet.create({
     width: WHEEL_SIZE,
     height: WHEEL_SIZE,
     position: 'relative',
-  },
-  wheel: {
-    width: WHEEL_SIZE,
-    height: WHEEL_SIZE,
-    borderRadius: WHEEL_SIZE / 2,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  segment: {
-    position: 'absolute',
-    width: WHEEL_SIZE / 2,
-    height: WHEEL_SIZE / 2,
-    top: WHEEL_SIZE / 4,
-    left: WHEEL_SIZE / 4,
-    transformOrigin: 'center center',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 20,
-  },
-  segmentText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1F2937',
-  },
-  centerCircle: {
-    position: 'absolute',
-    top: WHEEL_SIZE / 2 - 40,
-    left: WHEEL_SIZE / 2 - 40,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(0,0,0,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#EAB308',
+  },
+  wheelAnimated: {
+    width: WHEEL_SIZE,
+    height: WHEEL_SIZE,
+  },
+  centerButton: {
+    position: 'absolute',
+    width: WHEEL_SIZE * 0.35,
+    height: WHEEL_SIZE * 0.35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  centerButtonCircle: {
+    width: '100%',
+    height: '100%',
+    borderRadius: (WHEEL_SIZE * 0.35) / 2,
+    backgroundColor: '#EAB308',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  centerButtonText: {
+    fontSize: 40,
+  },
+  centerButtonImage: {
+    width: '100%',
+    height: '100%',
+  },
+  centerLogoOverlay: {
+    position: 'absolute',
+    width: WHEEL_SIZE * 0.3,
+    height: WHEEL_SIZE * 0.3,
+    borderRadius: (WHEEL_SIZE * 0.3) / 2,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 6,
+    borderColor: '#374151',
+    zIndex: 10,
+  },
+  centerLogo: {
+    width: WHEEL_SIZE * 0.2,
+    height: WHEEL_SIZE * 0.2,
   },
   pointer: {
     position: 'absolute',
-    top: -20,
-    left: WHEEL_SIZE / 2 - 20,
+    top: -15,
+    left: WHEEL_SIZE / 2 - 15,
+    zIndex: 11,
+  },
+  pointerTriangle: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 15,
+    borderRightWidth: 15,
+    borderBottomWidth: 30,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#EAB308',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   spinButton: {
     backgroundColor: '#FFFFFF',

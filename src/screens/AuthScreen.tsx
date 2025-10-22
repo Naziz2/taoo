@@ -14,6 +14,7 @@ import {
   Image,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -27,6 +28,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const { t } = useLanguage();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const insets = useSafeAreaInsets();
   
   const [step, setStep] = useState<AuthStep>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -65,7 +67,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const handlePhoneSubmit = async () => {
     const digits = phoneNumber.replace(/\D/g, '');
     if (digits.length < 12) {
-      setError('Please enter a valid Saudi phone number');
+      setError(t('auth.errorValidPhone'));
       return;
     }
 
@@ -83,7 +85,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       setStep('otp');
       setResendTimer(60);
     } catch (err) {
-      setError('Failed to send OTP. Please try again.');
+      setError(t('auth.errorSendOTP'));
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +114,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
     const otpCode = otp.join('');
     
     if (otpCode.length !== 4) {
-      setError('Please enter the complete 4-digit code');
+      setError(t('auth.errorComplete4Digit'));
       return;
     }
 
@@ -134,7 +136,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
             firstName: 'Existing',
             lastName: 'User',
             level: 'basic',
-            points: 13614,
+            points: 13814,
             accountComplited: 90,
             monthlyLimit: 7500,
             usedThisMonth: 2440,
@@ -148,10 +150,10 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
           onAuthSuccess?.(userData);
         }
       } else {
-        setError(t('auth.invalidCode') || 'Invalid verification code. Please try again.');
+        setError(t('auth.invalidCode'));
       }
     } catch (err) {
-      setError(t('auth.verificationFailed') || 'Verification failed. Please try again.');
+      setError(t('auth.verificationFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +161,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
 
   const handleProfileSubmit = async () => {
     if (!firstName.trim() || !lastName.trim()) {
-      setError('Please enter your first and last name');
+      setError(t('auth.errorFirstLastName'));
       return;
     }
 
@@ -176,7 +178,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         level: 'basic',
-        points: 13614,
+        points: 13814,
         accountComplited: 90,
         monthlyLimit: 7500,
         usedThisMonth: 2440,
@@ -190,7 +192,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       
       onAuthSuccess?.(userData);
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError(t('auth.errorRegistration'));
     } finally {
       setIsLoading(false);
     }
@@ -204,9 +206,9 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setResendTimer(60);
       setError('');
-      Alert.alert('Success', 'Verification code sent!');
+      Alert.alert(t('auth.welcomeBonusTitle'), t('auth.successCodeSent'));
     } catch (err) {
-      setError('Failed to resend code. Please try again.');
+      setError(t('auth.errorResend'));
     } finally {
       setIsLoading(false);
     }
@@ -221,7 +223,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
 
       {/* Title */}
       <Text style={[styles.stepTitle, isDark && styles.textDark]}>
-        {t('auth.welcomeToTaoo') || 'Welcome to DO Shopping'}
+        {t('auth.welcomeToTaoo')}
       </Text>
       <Text style={[styles.stepSubtitle, isDark && styles.textGrayDark]}>
         {t('auth.enterPhone')}
@@ -270,9 +272,9 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       <View style={styles.infoBox}>
         <MaterialCommunityIcons name="shield-check" size={20} color="#2563EB" />
         <View style={styles.infoTextContainer}>
-          <Text style={styles.infoTitle}>Your privacy is protected</Text>
+          <Text style={styles.infoTitle}>{t('auth.privacyTitle')}</Text>
           <Text style={styles.infoText}>
-            We'll send you a 4-digit verification code via SMS. Standard messaging rates may apply.
+            {t('auth.privacyText')}
           </Text>
         </View>
       </View>
@@ -351,7 +353,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       >
         <Text style={[styles.resendText, (resendTimer > 0 || isLoading) && styles.resendTextDisabled]}>
           {resendTimer > 0
-            ? `${t('auth.resendIn') || 'Resend code in'} ${resendTimer}s`
+            ? `${t('auth.resendIn')} ${resendTimer}s`
             : t('auth.resendCode')}
         </Text>
       </TouchableOpacity>
@@ -377,7 +379,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         {t('auth.completeProfile')}
       </Text>
       <Text style={[styles.stepSubtitle, isDark && styles.textGrayDark]}>
-        {t('auth.tellUsAboutYou') || 'Tell us a bit about yourself to get started'}
+        {t('auth.tellUsAboutYou')}
       </Text>
 
       {/* First Name */}
@@ -389,7 +391,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
           style={[styles.input, isDark && styles.inputDark]}
           value={firstName}
           onChangeText={setFirstName}
-          placeholder={t('auth.enterFirstName') || 'Enter your first name'}
+          placeholder={t('auth.enterFirstName')}
           placeholderTextColor="#9CA3AF"
         />
       </View>
@@ -403,7 +405,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
           style={[styles.input, isDark && styles.inputDark]}
           value={lastName}
           onChangeText={setLastName}
-          placeholder={t('auth.enterLastName') || 'Enter your last name'}
+          placeholder={t('auth.enterLastName')}
           placeholderTextColor="#9CA3AF"
         />
       </View>
@@ -428,7 +430,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
           <>
             <MaterialCommunityIcons name="check" size={20} color="#111827" />
             <Text style={styles.buttonText}>
-              {t('auth.completeRegistration') || 'Complete Registration'}
+              {t('auth.completeRegistration')}
             </Text>
           </>
         )}
@@ -439,7 +441,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         <MaterialCommunityIcons name="check" size={20} color="#059669" />
         <View style={styles.infoTextContainer}>
           <Text style={styles.bonusTitle}>
-            {t('auth.welcomeBonusTitle') || 'Welcome bonus!'}
+            {t('auth.welcomeBonusTitle')}
           </Text>
           <Text style={styles.bonusText}>{t('auth.welcomeBonus')}</Text>
         </View>
@@ -458,7 +460,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={[styles.header, isDark && styles.headerDark]}>
+          <View style={[styles.header, isDark && styles.headerDark, { paddingTop: insets.top + 16 }]}>
             <Text style={styles.logo}>DO SHOPPING</Text>
           </View>
 

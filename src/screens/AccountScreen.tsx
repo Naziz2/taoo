@@ -10,8 +10,9 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -23,6 +24,7 @@ export default function AccountScreen() {
   const { t, language, setLanguage } = useLanguage();
   const { user, logout } = useUser();
   const navigation = useNavigation<AccountScreenNavigationProp>();
+  const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState({ title: '', message: '', options: [] as any[] });
 
@@ -326,75 +328,161 @@ export default function AccountScreen() {
   };
 
   const menuItems = [
-    { icon: 'account', label: t('account.profile'), onPress: handleProfile },
-    { icon: 'web', label: t('account.language'), onPress: handleLanguage },
-    { icon: 'bell', label: t('account.notifications'), onPress: handleNotifications },
-    { icon: 'shield-check', label: t('account.privacy'), onPress: handlePrivacy },
-    { icon: 'help-circle', label: t('account.help'), onPress: handleHelp },
-    { icon: 'cog', label: t('account.settings'), onPress: handleSettings },
+    { 
+      icon: 'crown', 
+      label: t('account.level'), 
+      subtitle: t('account.currentLevel') || 'Current level',
+      iconBg: '#FEF3C7',
+      iconColor: '#F59E0B',
+      onPress: handleProfile 
+    },
+    { 
+      icon: 'wallet', 
+      label: t('wallet.title'), 
+      subtitle: t('wallet.allTransactions') || 'All your transactions',
+      iconBg: '#E0E7FF',
+      iconColor: '#6366F1',
+      onPress: () => Alert.alert(t('wallet.title'), 'Navigate to wallet transactions')
+    },
+    { 
+      icon: 'heart', 
+      label: t('account.favorites'), 
+      subtitle: t('account.favoritesDesc') || 'Deals and favorite stores',
+      iconBg: '#FCE7F3',
+      iconColor: '#EC4899',
+      onPress: () => Alert.alert(t('account.favorites'), 'Feature coming soon')
+    },
+    { 
+      icon: 'tag', 
+      label: t('account.interests'), 
+      subtitle: t('account.interestsDesc') || 'All your interests',
+      iconBg: '#DBEAFE',
+      iconColor: '#3B82F6',
+      onPress: () => Alert.alert(t('account.interests'), 'Feature coming soon')
+    },
+    { 
+      icon: 'percent', 
+      label: t('account.records'), 
+      subtitle: t('account.recordsDesc') || 'All your transactions',
+      iconBg: '#D1FAE5',
+      iconColor: '#10B981',
+      onPress: () => Alert.alert(t('account.records'), 'Feature coming soon')
+    },
+    { 
+      icon: 'help-circle', 
+      label: t('help.title'), 
+      subtitle: t('account.helpDesc') || 'Technical support',
+      iconBg: '#E0E7FF',
+      iconColor: '#8B5CF6',
+      onPress: handleHelp 
+    },
+    { 
+      icon: 'web', 
+      label: t('account.language'), 
+      subtitle: t('account.chooseLanguage') || 'Choose your language',
+      iconBg: '#DBEAFE',
+      iconColor: '#0EA5E9',
+      onPress: handleLanguage 
+    },
+    { 
+      icon: 'theme-light-dark', 
+      label: t('account.appearance'), 
+      subtitle: t('account.appearanceDesc') || 'Light or dark mode option',
+      iconBg: '#F3E8FF',
+      iconColor: '#A855F7',
+      onPress: handleSettings 
+    },
+  ];
+
+  const bottomMenuItems = [
+    { 
+      icon: 'delete', 
+      label: t('account.deleteAccount'), 
+      onPress: () => Alert.alert(t('account.deleteAccount'), 'Feature coming soon') 
+    },
+    { 
+      icon: 'logout', 
+      label: t('logout.title'), 
+      onPress: handleLogout 
+    },
+    { 
+      icon: 'file-document', 
+      label: t('account.terms'), 
+      onPress: () => navigation.navigate('TermsOfService')
+    },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('account.title')}</Text>
-        <Text style={styles.languageIndicator}>🌐 {language.toUpperCase()}</Text>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <View style={styles.pointsBadge}>
+          <Text style={styles.pointsIcon}>💰</Text>
+          <Text style={styles.pointsText}>{user?.points?.toLocaleString() || '0'}</Text>
+        </View>
+        <Text style={styles.headerTitle}>TAOO</Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#111827" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Profile Card */}
         <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <MaterialCommunityIcons name="account" color="#FFFFFF" size={40} />
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              <MaterialCommunityIcons name="account" color="#6B7280" size={48} />
+            </View>
+            <View style={styles.levelBadgeTop}>
+              <Text style={styles.levelBadgeText}>مكمّل بنسبة 90%</Text>
+            </View>
           </View>
-          <Text style={styles.userName}>
-            {user?.firstName && user?.lastName 
-              ? `${user.firstName} ${user.lastName}` 
-              : 'User'}
-          </Text>
-          <Text style={styles.userEmail}>{user?.phone || user?.email || 'Not available'}</Text>
-          <View style={styles.levelBadge}>
-            <Text style={styles.levelText}>{user?.level || 'Basic'} Level</Text>
-          </View>
-          {user?.level !== 'gold' && (
-            <TouchableOpacity 
-              style={styles.upgradeButton}
-              onPress={handleUpgrade}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons name="star" color="#FFFFFF" size={18} />
-              <Text style={styles.upgradeButtonText}>{t('account.upgrade')}</Text>
-            </TouchableOpacity>
-          )}
+          
+          <Text style={styles.userName}>Existing User</Text>
+          <Text style={styles.userPhone}>Phone: +966 99 999 9999</Text>
+          <Text style={styles.userLevel}>Level: basic</Text>
         </View>
 
+        {/* Main Menu Items */}
         <View style={styles.menu}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={styles.menuItem}
-              onPress={() => {
-                console.log(`Menu item pressed: ${item.label}`);
-                item.onPress();
-              }}
+              onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View style={styles.menuItemLeft}>
-                <MaterialCommunityIcons name={item.icon} color="#6B7280" size={24} />
-                <Text style={styles.menuItemText} numberOfLines={1}>{item.label}</Text>
+              <View style={[styles.menuIcon, { backgroundColor: item.iconBg }]}>
+                <MaterialCommunityIcons name={item.icon as any} color={item.iconColor} size={24} />
+              </View>
+              <View style={styles.menuItemContent}>
+                <Text style={styles.menuItemText}>{item.label}</Text>
+                <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
               </View>
               <MaterialCommunityIcons name="chevron-right" color="#9CA3AF" size={24} />
             </TouchableOpacity>
           ))}
         </View>
 
-        <TouchableOpacity 
-          style={styles.logoutButton} 
-          onPress={handleLogout}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons name="logout" color="#EF4444" size={24} />
-          <Text style={styles.logoutText}>{t('account.logout')}</Text>
-        </TouchableOpacity>
+        {/* Bottom Menu Items */}
+        <View style={styles.bottomMenu}>
+          {bottomMenuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.bottomMenuItem}
+              onPress={item.onPress}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons name={item.icon as any} color="#6B7280" size={20} />
+              <Text style={styles.bottomMenuText}>{item.label}</Text>
+              <MaterialCommunityIcons name="chevron-right" color="#9CA3AF" size={20} />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={{ height: 32 }} />
       </ScrollView>
 
       {/* Custom Modal Dialog */}
@@ -445,87 +533,103 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F3F4F6',
   },
   header: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  pointsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+  },
+  pointsIcon: {
+    fontSize: 14,
+  },
+  pointsText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#92400E',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: -8,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#111827',
-  },
-  languageIndicator: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginTop: 4,
+    flex: 1,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
   },
   profileCard: {
     backgroundColor: '#FFFFFF',
-    marginTop: 16,
     marginHorizontal: 16,
+    marginTop: 16,
     padding: 24,
     borderRadius: 16,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#EAB308',
+    backgroundColor: '#F3F4F6',
+    borderWidth: 3,
+    borderColor: '#F59E0B',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+  },
+  levelBadgeTop: {
+    position: 'absolute',
+    bottom: -8,
+    backgroundColor: '#F59E0B',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  levelBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   userName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#111827',
     marginBottom: 4,
   },
-  userEmail: {
+  userPhone: {
     fontSize: 14,
     color: '#6B7280',
-    marginBottom: 12,
+    marginBottom: 2,
   },
-  levelBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  levelText: {
+  userLevel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#92400E',
-  },
-  upgradeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EAB308',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    gap: 6,
-    marginTop: 4,
-  },
-  upgradeButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#6B7280',
   },
   menu: {
     backgroundColor: '#FFFFFF',
@@ -533,49 +637,67 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 16,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   menuItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
-  menuItemLeft: {
-    flexDirection: 'row',
+  menuIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
+  },
+  menuItemContent: {
     flex: 1,
     marginRight: 12,
   },
   menuItemText: {
-    fontSize: 16,
-    color: '#374151',
-    marginLeft: 12,
-    flexShrink: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 2,
   },
-  menuItemArrow: {
-    fontSize: 24,
+  menuItemSubtitle: {
+    fontSize: 13,
     color: '#9CA3AF',
-    minWidth: 20,
   },
-  logoutButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+  bottomMenu: {
     backgroundColor: '#FFFFFF',
     marginTop: 16,
     marginHorizontal: 16,
-    marginBottom: 32,
-    padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#EF4444',
-    marginLeft: 8,
+  bottomMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  bottomMenuText: {
+    fontSize: 14,
+    color: '#111827',
+    marginLeft: 12,
+    flex: 1,
   },
   modalOverlay: {
     flex: 1,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import { ThemeProvider } from './src/contexts/ThemeContext';
@@ -15,6 +16,8 @@ export default function App() {
   // Clear any existing session on app start
   useEffect(() => {
     clearSession();
+    // Enable RTL support globally
+    I18nManager.allowRTL(true);
   }, []);
 
   const clearSession = async () => {
